@@ -27,6 +27,7 @@ test_objects := $(patsubst %,obj_dir/V%,$(test_names))
 test: $(test_objects)
 
 test_run: test
+	mkdir -p trace
 	$(foreach name,$(test_names),obj_dir/V$(name))
 	
 clean:
