@@ -1,5 +1,5 @@
 // Current state of the UPDI programmer.
-enum {
+typedef enum {
 	UPDI_PROG_IDLE,
 	UPDI_PROG_RESET_UPDI,
 	UPDI_PROG_RESET_CHIP,

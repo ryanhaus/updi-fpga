@@ -1,7 +1,7 @@
 // The mode that the UART/UPDI bridge is in.
 // The bridge can either let TX or RX traffic
 // pass through the UPDI line.
-enum {
+typedef enum {
 	UPDI_BRIDGE_MODE_IDLE, // pulls UPDI line high
 	UPDI_BRIDGE_MODE_TX, // allows TX traffic through
 	UPDI_BRIDGE_MODE_RX, // allows RX traffic through
@@ -19,7 +19,7 @@ module uart_updi_bridge (
 	input updi_bridge_mode mode,
 
 	// UPDI
-	inout logic updi
+	inout updi
 );
 
 	always_comb begin
