@@ -13,7 +13,7 @@ module uart #(
 	parameter PARITY_BIT = "none", // "none", "even", or "odd"
 	parameter STOP_BITS = 1 // 1 - 2
 ) (
-	input clk, // gets divided by CLK_DIV to create baud rate
+	input clk,
 	input rst,
 
 	// transmit
@@ -25,6 +25,7 @@ module uart #(
 	// receive
 	output [DATA_BITS-1 : 0] rx_data,
 	output rx_data_valid,
+	output rx_error,
 	input rx
 );
 
@@ -32,6 +33,6 @@ module uart #(
 	uart_tx #(DATA_BITS, PARITY_BIT, STOP_BITS) tx_module (clk, rst, tx_data, transmit_start, transmit_ready, tx);
 		
 	// receive
-	// TODO
+	uart_rx #(DATA_BITS, PARITY_BIT) rx_module (clk, rst, rx_data, rx_data_valid, rx_error, rx);
 
 endmodule
