@@ -46,4 +46,4 @@ test_run: test
 	
 # remove obj_dir (build) folder
 clean:
-	rm -rf obj_dir src/generated
+	rm -rf obj_dir src/generated trace
