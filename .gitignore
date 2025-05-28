@@ -1,4 +1,5 @@
 dep
 trace
 obj_dir
+src/generated
 *.vcd
