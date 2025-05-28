@@ -1,3 +1,4 @@
+# lint all verilog
 lint:
 	verilator \
 		-y src \
@@ -6,6 +7,14 @@ lint:
 		--lint-only \
 		--top-module top
 
+# for converting Intel hex file to a file readable by Verilog
+PROG_HEX := res/program.hex
+PROG_MEM := obj_dir/program.mem
+$(PROG_MEM): $(PROG_HEX)
+	mkdir -p obj_dir
+	python3 src/util/program_convert.py $(PROG_HEX) $(PROG_MEM)
+
+# build testbench simulation programs w/ matching
 obj_dir/Vtb_%: src/test/tb_%.sv src/rtl/%.sv
 	verilator \
 		-y src \
@@ -20,6 +29,7 @@ obj_dir/Vtb_%: src/test/tb_%.sv src/rtl/%.sv
 		--top-module tb_$* \
 		--main-top-name tb_$*
 
+# for building and running all testbenches
 test_srcs := $(wildcard src/test/*.sv)
 test_names := $(patsubst src/test/%.sv,%,$(test_srcs))
 test_objects := $(patsubst %,obj_dir/V%,$(test_names))
@@ -30,5 +40,6 @@ test_run: test
 	mkdir -p trace
 	$(foreach name,$(test_names),obj_dir/V$(name))
 	
+# remove obj_dir (build) folder
 clean:
 	rm -rf obj_dir

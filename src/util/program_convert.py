@@ -20,7 +20,7 @@ def split_to_bytes(val, n_bytes=2):
 
 def main():
     if len(sys.argv) != 3:
-        print("Usage: python3 rom_convert.py [input file] [output file]")
+        print(f"Usage: python3 {sys.argv[0]} [input file] [output file]")
         return
 
     in_file = sys.argv[1]
