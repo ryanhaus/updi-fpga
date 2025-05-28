@@ -20,6 +20,7 @@ generated: $(generated_objects)
 
 # build testbench simulation programs w/ matching
 obj_dir/Vtb_%: generated src/test/tb_%.sv src/rtl/%.sv
+	mkdir -p trace
 	verilator \
 		-y src \
 		src/*/*.sv \
