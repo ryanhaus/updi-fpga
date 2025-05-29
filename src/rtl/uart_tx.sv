@@ -57,8 +57,6 @@ module uart_tx #(
 
 					// handle going to next state if applicable
 					if (counter == DATA_BITS-1) begin
-						counter = 'b0;
-
 						if (PARITY_BIT == "none") begin
 							state = UART_STOP;
 						end
@@ -80,7 +78,15 @@ module uart_tx #(
 						"odd": tx = parity_result;
 					endcase
 
-					state = UART_STOP;
+					// for just 1 stop bit, simply going back to idle is
+					// enough since it will pull TX high
+					if (STOP_BITS > 1) begin
+						counter = 'b1;
+						state = UART_STOP;
+					end
+					else begin
+						state = UART_IDLE;
+					end
 				end
 
 				UART_STOP: begin
@@ -93,8 +99,6 @@ module uart_tx #(
 						state = UART_STOP;
 					end
 					else begin
-						// handle next state
-						// TODO: for speed, skip going back to IDLE if start is 1
 						state = UART_IDLE;
 						ready = 'b1;
 					end

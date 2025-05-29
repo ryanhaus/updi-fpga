@@ -23,7 +23,7 @@ module tb_uart();
 
 	// used in testbench
 	logic [11:0] tx_buffer;
-	integer i;
+	integer i, j;
 
 	initial begin
 		$dumpfile("trace/tb_uart.vcd");
@@ -50,8 +50,11 @@ module tb_uart();
 			parity_data = tx_data;
 
 			transmit_start = 'b1;
+			
+			#10 clk = 'b1;
+			#10 clk = 'b0;
 
-			do begin
+			for (j = 0; j < 12; j = j + 1) begin
 				#10 clk = 'b1;
 				#10 clk = 'b0;
 
@@ -61,7 +64,7 @@ module tb_uart();
 
 				tx_buffer = tx_buffer << 1;
 				tx_buffer[0] = tx;
-			end while (!transmit_ready);
+			end
 
 			if (tx_buffer != { 1'b0, tx_data_rev, parity, 2'b11 }) $error();
 			if (!rx_data_valid || rx_error) $error();
