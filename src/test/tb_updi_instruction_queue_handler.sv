@@ -1,5 +1,5 @@
-// testbench for updi_instruction_handler
-module tb_updi_instruction_handler();
+// testbench for updi_instruction_queue_handler
+module tb_updi_instruction_queue_handler();
 
 	parameter MAX_DATA_SIZE = 16;
 	parameter DATA_ADDR_BITS = $clog2(MAX_DATA_SIZE);
@@ -22,7 +22,7 @@ module tb_updi_instruction_handler();
 	);
 
 	// dut on posedge
-	updi_instruction_handler #( 
+	updi_instruction_queue_handler #( 
 		.MAX_DATA_SIZE(MAX_DATA_SIZE),
 		.DATA_ADDR_BITS(DATA_ADDR_BITS)
 	) dut (
@@ -35,7 +35,7 @@ module tb_updi_instruction_handler();
 	integer i;
 
 	initial begin
-		$dumpfile("trace/tb_updi_instruction_handler.vcd");
+		$dumpfile("trace/tb_updi_instruction_queue_handler.vcd");
 		$dumpvars();
 
 		// reset
@@ -203,6 +203,9 @@ module tb_updi_instruction_handler();
 		#10 clk = 'b1;
 		#10 clk = 'b0;
 		ack_received = 'b0;
+
+		#10 clk = 'b1;
+		#10 clk = 'b0;
 
 		if (!ready) $error();
 

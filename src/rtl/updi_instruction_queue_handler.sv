@@ -1,15 +1,15 @@
-// All possible states for updi_instruction_handler
+// All possible states for updi_instruction_queue_handler
 typedef enum {
 	UPDI_INSTR_HDLR_IDLE,
 	UPDI_INSTR_HDLR_WR_SYNCH,
 	UPDI_INSTR_HDLR_WR_OPCODE,
 	UPDI_INSTR_HDLR_WR_DATA,
 	UPDI_INSTR_HDLR_WAIT_ACK
-} updi_instruction_handler_state;
+} updi_instruction_queue_handler_state;
 
 // Takes in instruction requests and writes out individual bytes representing
 // the instructions to an external FIFO. Also handles waiting for ACK signals
-module updi_instruction_handler #(
+module updi_instruction_queue_handler #(
 	parameter MAX_DATA_SIZE = 16,
 	parameter DATA_ADDR_BITS = $clog2(MAX_DATA_SIZE)
 ) (
@@ -35,7 +35,7 @@ module updi_instruction_handler #(
 );
 
 	// state machine
-	updi_instruction_handler_state state;
+	updi_instruction_queue_handler_state state;
 	logic [DATA_ADDR_BITS-1 : 0] counter;
 
 	always_ff @(posedge clk) begin
