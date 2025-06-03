@@ -73,7 +73,7 @@ module tb_updi_interface();
 		.clk(~clk),
 		.rst(rst),
 		.in(rx_in_fifo_data),
-		.out(uart_tx_fifo_data),
+		.out(uart_rx_fifo_data),
 		.rd_en(uart_rx_fifo_rd_en),
 		.wr_en(rx_in_fifo_wr_en),
 		.empty(uart_rx_fifo_empty),
