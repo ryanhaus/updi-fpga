@@ -1,12 +1,4 @@
-// The mode that the UART/UPDI bridge is in.
-// The bridge can either let TX or RX traffic
-// pass through the UPDI line.
-typedef enum {
-	UPDI_BRIDGE_MODE_IDLE, // pulls UPDI line high
-	UPDI_BRIDGE_MODE_TX, // allows TX traffic through
-	UPDI_BRIDGE_MODE_RX, // allows RX traffic through
-	UPDI_BRIDGE_MODE_BREAK // pulls UPDI line low
-} updi_bridge_mode;
+`include "include.sv"
 
 // Converts UART (a TX/RX pair) into an UPDI signal.
 // Note that the 'mode' has to be selected

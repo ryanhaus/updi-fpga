@@ -1,14 +1,4 @@
-// All of the UPDI instructions
-enum {
-	UPDI_LDS,
-	UPDI_LD,
-	UPDI_STS,
-	UPDI_ST,
-	UPDI_LDCS,
-	UPDI_REPEAT,
-	UPDI_STCS,
-	UPDI_KEY
-} updi_instruction;
+`include "include.sv"
 
 // Takes in an UPDI instruction and relevant parameters and converts it into
 // an opcode
