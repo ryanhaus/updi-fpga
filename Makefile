@@ -1,7 +1,7 @@
 # lint all verilog
 lint:
 	verilator \
-		-y src \
+		-y src/rtl \
 		src/*/*.sv \
 		-sv \
 		--lint-only \
@@ -22,7 +22,7 @@ generated: $(generated_objects)
 obj_dir/Vtb_%: generated src/test/tb_%.sv src/rtl/%.sv
 	mkdir -p trace
 	verilator \
-		-y src \
+		-y src/rtl \
 		src/*/*.sv \
 		-sv \
 		--cc \
