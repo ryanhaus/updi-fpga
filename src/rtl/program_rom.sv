@@ -18,7 +18,7 @@ module program_rom #(
 	output [7:0] block_data [DATA_BLOCK_MAX_SIZE]
 );
 
-	localparam ROM_ADDR_BITS = $clog2(size);
+	localparam ROM_ADDR_BITS = $clog2(SIZE);
 	localparam ROM_DATA_BITS = 8;
 
 	// ROM module
