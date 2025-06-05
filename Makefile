@@ -34,6 +34,12 @@ obj_dir/Vtb_%: generated src/test/tb_%.sv src/rtl/%.sv
 		--top-module tb_$* \
 		--main-top-name tb_$*
 
+test_%: obj_dir/Vtb_%
+	@: # make doesn't recognize this unless there's something in the body for some ungodly reason
+
+test_run_%: obj_dir/Vtb_%
+	obj_dir/Vtb_$*
+
 # for building and running all testbenches
 test_srcs := $(wildcard src/test/*.sv)
 test_names := $(patsubst src/test/%.sv,%,$(test_srcs))
