@@ -3,7 +3,9 @@
 module program_rom #(
 	parameter FILE_NAME = "",
 	parameter SIZE = 1,
-	parameter DATA_BLOCK_MAX_SIZE = 64
+	parameter DATA_BLOCK_MAX_SIZE = 64,
+	parameter ROM_ADDR_BITS = $clog2(SIZE),
+	localparam ROM_DATA_BITS = 8
 ) (
 	input clk,
 	input rst,
@@ -17,10 +19,6 @@ module program_rom #(
 	output [7:0] block_type,
 	output [7:0] block_data [DATA_BLOCK_MAX_SIZE]
 );
-
-	localparam ROM_ADDR_BITS = $clog2(size);
-	localparam ROM_DATA_BITS = 8;
-
 	// ROM module
 	logic [ROM_ADDR_BITS-1 : 0] rom_addr;
 	logic [ROM_DATA_BITS-1 : 0] rom_data;

@@ -14,26 +14,33 @@ module uart_updi_bridge (
 	inout updi
 );
 
+	logic updi_en, updi_out;
+	assign updi = updi_en ? updi_out : 1'bz;
+
 	always_comb begin
 		case (mode)
 			UPDI_BRIDGE_MODE_IDLE: begin
-				updi <= 'b1;
-				rx <= 'b0;
+				updi_out = 'b1;
+				updi_en = 'b1;
+				rx = 'b0;
 			end
 
 			UPDI_BRIDGE_MODE_TX: begin
-				updi <= tx;
-				rx <= 'b0;
+				updi_out = tx;
+				updi_en = 'b1;
+				rx = 'b0;
 			end
 
 			UPDI_BRIDGE_MODE_RX: begin
-				updi <= 'bz;
-				rx <= updi;
+				updi_out = 'b0;
+				updi_en = 'b0;
+				rx = updi;
 			end
 
 			UPDI_BRIDGE_MODE_BREAK: begin
-				updi <= 'b0;
-				rx <= 'b0;
+				updi_out = 'b0;
+				updi_en = 'b1;
+				rx = 'b0;
 			end
 		endcase
 	end

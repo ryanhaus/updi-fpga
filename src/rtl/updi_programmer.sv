@@ -16,7 +16,7 @@ typedef enum {
 module updi_programmer #(
 	parameter ROM_FILE_NAME = "",
 	parameter ROM_SIZE = 1,
-	parameter ROM_ADDR_BITS = 16,
+	parameter ROM_ADDR_BITS = $clog2(ROM_SIZE),
 	parameter ROM_DATA_BITS = 8,
 
 	parameter MAX_INSTRUCTION_DATA_SIZE = 64,
@@ -51,9 +51,9 @@ module updi_programmer #(
 	logic [1:0] instr_size_a, instr_size_b, instr_ptr, instr_size_c;
 	logic [3:0] instr_cs_addr;
 
-	logic [7:0] instr_data [MAX_DATA_SIZE];
+	logic [7:0] instr_data [MAX_INSTRUCTION_DATA_SIZE];
 	logic [DATA_ADDR_BITS-1 : 0] instr_data_len;
-	logic [MAX_DATA_SIZE-1 : 0] instr_wait_ack_after;
+	logic [MAX_INSTRUCTION_DATA_SIZE-1 : 0] instr_wait_ack_after;
 
 	logic interface_tx_start, interface_tx_ready;
 	logic interface_rx_start, interface_rx_ready, interface_ack_error;
@@ -81,7 +81,8 @@ module updi_programmer #(
 	program_rom #(
 		.FILE_NAME(ROM_FILE_NAME),
 		.SIZE(ROM_SIZE),
-		.DATA_BLOCK_MAX_SIZE(DATA_BLOCK_MAX_SIZE)
+		.DATA_BLOCK_MAX_SIZE(DATA_BLOCK_MAX_SIZE),
+		.ROM_ADDR_BITS(ROM_ADDR_BITS)
 	) rom_inst (
 		.clk(clk),
 		.rst(rst),
@@ -134,7 +135,7 @@ module updi_programmer #(
 	) rx_out_fifo_inst (
 		.clk(clk),
 		.rst(rst),
-		.in(out_rx_fifo_data),
+		.in(out_rx_fifo_data_in),
 		.out(out_rx_fifo_data_out),
 		.rd_en(out_rx_fifo_rd_en),
 		.wr_en(out_rx_fifo_wr_en),
@@ -149,10 +150,10 @@ module updi_programmer #(
 		.clk(clk),
 		.uart_clk(uart_clk),
 		.rst(rst),
-		.uart_tx_fifo_data(uart_tx_fifo_data),
+		.uart_tx_fifo_data(uart_tx_fifo_data_in),
 		.uart_tx_fifo_wr_en(uart_tx_fifo_wr_en),
 		.uart_tx_fifo_full(uart_tx_fifo_full),
-		.uart_rx_fifo_data(uart_rx_fifo_data),
+		.uart_rx_fifo_data(uart_rx_fifo_data_out),
 		.uart_rx_fifo_rd_en(uart_rx_fifo_rd_en),
 		.uart_rx_fifo_empty(uart_rx_fifo_empty),
 		.rx_error(phy_rx_error),

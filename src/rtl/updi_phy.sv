@@ -1,3 +1,5 @@
+`include "include.sv"
+
 // Handles UART/UPDI transactions
 module updi_phy #(
 	parameter UART_FIFO_DEPTH = 16,
@@ -29,7 +31,7 @@ module updi_phy #(
 	logic tx, rx;
 	logic uart_tx_active;
 	logic double_break_pulse;
-	uart_updi_bridge_mode bridge_mode;
+	updi_bridge_mode bridge_mode;
 
 	// UART FIFO instance
 	uart_fifo #(
@@ -43,7 +45,7 @@ module updi_phy #(
 		.rst(rst),
 		.tx_data(uart_tx_fifo_data),
 		.rx_data(uart_rx_fifo_data),
-		.tx_fifo_wr_en(uart_tx_fifo_wr),
+		.tx_fifo_wr_en(uart_tx_fifo_wr_en),
 		.rx_fifo_rd_en(uart_rx_fifo_rd_en),
 		.tx_fifo_full(uart_tx_fifo_full),
 		.tx_fifo_empty(),
