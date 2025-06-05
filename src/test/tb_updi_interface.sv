@@ -241,6 +241,9 @@ module tb_updi_interface();
 		if (!rx_ready) $error();
 		rx_n_bytes = 'd2;
 		rx_start = 'b1;
+		#10 clk = 'b1;
+		#10 clk = 'b0;
+		rx_start = 'b0;
 
 		// delay
 		for (i = 0; i < 10; i = i + 1) begin
