@@ -97,7 +97,7 @@ module tb_updi_interface();
 	// testbench logic
 	integer i;
 
-	initial #100000 $error();
+	initial #10000 $error();
 	initial begin
 		$dumpfile("trace/tb_updi_interface.vcd");
 		$dumpvars();
@@ -109,25 +109,33 @@ module tb_updi_interface();
 		#10 clk = 'b1;
 		#10 clk = 'b0;
 		rst = 'b0;
+		#10 clk = 'b1;
+		#10 clk = 'b0;
 
-		// send a test instruction with ACK expected
-		instruction = UPDI_ST;
-		ptr = 'b10;
+		// send a test instruction with ACK and data expected
+		instruction = UPDI_STS;
+		size_a = 'b01;
+		size_b = 'b01;
 
 		data = '{default: 'b0};
 		data[0] = 'h12;
 		data[1] = 'h34;
+		data[2] = 'h56;
+		data[3] = 'h78;
 
-		data_len = 'd2;
+		data_len = 'd4;
 		
 		wait_ack_after = 'b0;
 		wait_ack_after[1] = 'b1;
+		wait_ack_after[3] = 'b1;
 
 		if (!tx_ready) $error();
 		tx_start = 'b1;
 		#10 clk = 'b1;
 		#10 clk = 'b0;
+		tx_start = 'b0;
 
+		// delay
 		for (i = 0; i < 10; i = i + 1) begin
 			#10 clk = 'b1;
 			#10 clk = 'b0;
@@ -139,13 +147,127 @@ module tb_updi_interface();
 		rx_in_fifo_wr_en = 'b1;
 		#10 clk = 'b0;
 		#10 clk = 'b1;
+		rx_in_fifo_wr_en = 'b0;
+		#10 clk = 'b0;
+
+		// delay
+		for (i = 0; i < 10; i = i + 1) begin
+			#10 clk = 'b1;
+			#10 clk = 'b0;
+			if (ack_error) $error();
+		end
+
+		if (tx_ready) $error(); // should still wait for last ACK
+
+		// write second ACK to RX in FIFO
+		#10 clk = 'b1;
+		rx_in_fifo_data = 'h40;
 		rx_in_fifo_wr_en = 'b1;
+		#10 clk = 'b0;
+		#10 clk = 'b1;
+		rx_in_fifo_wr_en = 'b0;
 		#10 clk = 'b0;
 
 		while (!tx_ready) begin
 			#10 clk = 'b1;
 			#10 clk = 'b0;
+			if (ack_error) $error();
 		end
+
+		// verify TX out FIFO contents
+		i = 0;
+		tx_out_fifo_rd_en = 'b1;
+		while (!tx_out_fifo_empty) begin
+			#10 clk = 'b1;
+			#10 clk = 'b0;
+
+			case (i)
+				0: if (tx_out_fifo_data != 'h55) $error();
+				1: if (tx_out_fifo_data != 'h45) $error();
+				2: if (tx_out_fifo_data != 'h12) $error();
+				3: if (tx_out_fifo_data != 'h34) $error();
+				4: if (tx_out_fifo_data != 'h56) $error();
+				5: if (tx_out_fifo_data != 'h78) $error();
+				default: $error();
+			endcase
+
+			i = i + 1;
+		end
+
+		tx_out_fifo_rd_en = 'b0;
+
+		// send another instruction that expects to read data back
+		instruction = UPDI_LDS;
+		size_a = 'b01;
+		size_b = 'b01;
+
+		data = '{default: 'b0};
+		data[0] = 'h12;
+		data[1] = 'h34;
+
+		data_len = 'd2;
+		
+		wait_ack_after = 'b0;
+
+		if (!tx_ready) $error();
+		tx_start = 'b1;
+		#10 clk = 'b1;
+		#10 clk = 'b0;
+		tx_start = 'b0;
+
+		// delay
+		for (i = 0; i < 10; i = i + 1) begin
+			#10 clk = 'b1;
+			#10 clk = 'b0;
+		end
+
+		// write some values to RX input FIFO
+		rx_in_fifo_wr_en = 'b1;
+		rx_in_fifo_data = 'h56;
+		#10 clk = 'b1;
+		#10 clk = 'b0;
+		rx_in_fifo_data = 'h78;
+		#10 clk = 'b1;
+		#10 clk = 'b0;
+		rx_in_fifo_wr_en = 'b0;
+
+		// delay
+		for (i = 0; i < 10; i = i + 1) begin
+			#10 clk = 'b1;
+			#10 clk = 'b0;
+		end
+
+		// read out 2 values
+		if (!rx_ready) $error();
+		rx_n_bytes = 'd2;
+		rx_start = 'b1;
+
+		// delay
+		for (i = 0; i < 10; i = i + 1) begin
+			#10 clk = 'b1;
+			#10 clk = 'b0;
+		end
+
+		// verify values in RX out FIFO
+		i = 0;
+		rx_out_fifo_rd_en = 'b1;
+
+		while (!rx_out_fifo_empty) begin
+			#10 clk = 'b1;
+			#10 clk = 'b0;
+
+			case (i)
+				0: if (rx_out_fifo_data != 'h56) $error();
+				1: if (rx_out_fifo_data != 'h78) $error();
+				default: $error();
+			endcase
+
+			i = i + 1;
+		end
+
+		rx_out_fifo_rd_en = 'b0;
+
+		$finish;
 	end
 
 endmodule
