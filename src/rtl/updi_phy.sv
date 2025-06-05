@@ -1,6 +1,7 @@
 // Handles UART/UPDI transactions
 module updi_phy #(
-	parameter UART_FIFO_DEPTH = 16
+	parameter UART_FIFO_DEPTH = 16,
+	parameter DOUBLE_BREAK_PULSE_CLK = 100000
 ) (
 	input clk,
 	input uart_clk,
@@ -16,9 +17,9 @@ module updi_phy #(
 	output uart_rx_fifo_empty,
 	output rx_error,
 
-	// UPDI override interface
-	input updi_override_en,
-	input updi_override_value,
+	// UPDI double break interface
+	input double_break_start,
+	output logic double_break_busy,
 
 	// UPDI output
 	output updi
@@ -26,6 +27,7 @@ module updi_phy #(
 
 	logic tx, rx;
 	logic uart_tx_active;
+	logic double_break_pulse;
 	uart_updi_bridge_mode bridge_mode;
 
 	// UART FIFO instance
@@ -63,9 +65,20 @@ module updi_phy #(
 	// UPDI bridge controller instance
 	updi_bridge_controller bridge_ctrl_inst (
 		.wr_en(uart_tx_active),
-		.override_en(updi_override_en),
-		.override_value(updi_override_value),
+		.override_en(double_break_busy),
+		.override_value(double_break_pulse),
 		.bridge_mode(bridge_mode)
+	);
+
+	// UPDI double break instance
+	updi_double_break #(
+		.PULSE_CLK(DOUBLE_BREAK_PULSE_CLK)
+	) double_break_inst (
+		.clk(clk),
+		.rst(rst),
+		.start(double_break_start),
+		.busy(double_break_busy),
+		.pulse(double_break_pulse)
 	);
 
 endmodule

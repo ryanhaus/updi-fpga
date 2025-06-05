@@ -25,9 +25,7 @@ module updi_programmer #(
 	parameter DATA_BLOCK_MAX_SIZE = 2 ** (DATA_ADDR_BITS + 1),
 
 	parameter UART_FIFO_DEPTH = 16,
-	parameter RX_OUT_FIFO_DEPTH = 16,
-
-	parameter UPDI_DOUBLE_BREAK_PULSE_CLK = 100000
+	parameter RX_OUT_FIFO_DEPTH = 16
 ) (
 	input clk,
 	input rst,
@@ -119,20 +117,9 @@ module updi_programmer #(
 		.uart_rx_fifo_rd_en(),
 		.uart_rx_fifo_empty(),
 		.rx_error(),
-		.updi_override_en(),
-		.updi_override_value(),
+		.double_break_start(),
+		.double_break_busy(),
 		.updi(updi)
-	);
-
-	// double break instance
-	updi_double_break #(
-		.PULSE_CLK(UPDI_DOUBLE_BREAK_PULSE_CLK)
-	) double_break_inst (
-		.clk(clk),
-		.rst(rst),
-		.start(),
-		.busy(),
-		.pulse()
 	);
 	
 	// State machine
