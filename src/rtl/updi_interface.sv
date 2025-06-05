@@ -83,9 +83,9 @@ module updi_interface #(
 		.fifo_full(uart_tx_fifo_full)
 	);
 
-	// input handler instance (on negedge)
+	// input handler instance
 	updi_input_handler #(.BITS_N(DATA_ADDR_BITS)) input_hdlr (
-		.clk(~clk),
+		.clk(clk),
 		.rst(rst),
 		.wait_ack(waiting_for_ack),
 		.ack_received(ack_received),

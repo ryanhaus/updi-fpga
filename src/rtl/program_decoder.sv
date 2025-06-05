@@ -41,74 +41,74 @@ module program_decoder #(
 
 	always_ff @(posedge clk) begin
 		if (rst) begin
-			state = PROG_DECODER_IDLE;
-			counter = 'b0;
+			state <= PROG_DECODER_IDLE;
+			counter <= 'b0;
 
-			ready = 'b0;
-			done = 'b0;
-			prog_addr = 'b0;
+			ready <= 'b0;
+			done <= 'b0;
+			prog_addr <= 'b0;
 		end
 		else begin
 			case (state)
 				PROG_DECODER_IDLE: begin
 					// wait idle until start signal
-					ready = 'b1;
-					counter = 'b0;
+					ready <= 'b1;
+					counter <= 'b0;
 
 					if (start) begin
-						done = 'b0;
-						ready = 'b0;
-						state = PROG_DECODER_READ_LENGTH;
+						done <= 'b0;
+						ready <= 'b0;
+						state <= PROG_DECODER_READ_LENGTH;
 					end
 				end
 
 				PROG_DECODER_READ_LENGTH: begin
 					// current value in ROM represents the block length
-					block_length = prog_data;
+					block_length <= prog_data;
 
 					// increase addr, next state
-					prog_addr = prog_addr + 'b1;
-					state = PROG_DECODER_READ_ADDRESS;
+					prog_addr <= prog_addr + 'b1;
+					state <= PROG_DECODER_READ_ADDRESS;
 				end
 
 				PROG_DECODER_READ_ADDRESS: begin
 					// address is a 2-byte value, MSB first
 					if (counter == 'b0) begin
 						// first cycle, read in MSB
-						block_address[15:8] = prog_data;
-						prog_addr = prog_addr + 'b1;
-						counter = counter + 'b1;
+						block_address[15:8] <= prog_data;
+						prog_addr <= prog_addr + 'b1;
+						counter <= counter + 'b1;
 					end
 					else begin
 						// second cycle, read in LSB & continue to next state
-						block_address[7:0] = prog_data;
-						prog_addr = prog_addr + 'b1;
-						counter = 'b0;
-						state = PROG_DECODER_READ_TYPE;
+						block_address[7:0] <= prog_data;
+						prog_addr <= prog_addr + 'b1;
+						counter <= 'b0;
+						state <= PROG_DECODER_READ_TYPE;
 					end
 				end
 
 				PROG_DECODER_READ_TYPE: begin
 					// current value in ROM represents the block type
-					block_type = prog_data;
-					prog_addr = prog_addr + 'b1;
-					state = PROG_DECODER_READ_DATA;
+					block_type <= prog_data;
+					prog_addr <= prog_addr + 'b1;
+					state <= PROG_DECODER_READ_DATA;
 				end
 
 				PROG_DECODER_READ_DATA: begin
 					// read block_length bytes from ROM
 					if (counter < block_length) begin
 						// keep reading until done
-						block_data[counter] = prog_data;
-						prog_addr = prog_addr + 'b1;
-						counter = counter + 'b1;
+						block_data[counter] <= prog_data;
+						prog_addr <= prog_addr + 'b1;
+						counter <= counter + 'b1;
 					end
 					else begin
 						// once block_length bytes have been read, block is
 						// finished
-						done = 'b1;
-						ready = 'b1;
-						state = PROG_DECODER_IDLE;
+						done <= 'b1;
+						ready <= 'b1;
+						state <= PROG_DECODER_IDLE;
 					end
 				end
 			endcase

@@ -23,5 +23,4 @@ typedef enum {
 	UPDI_BRIDGE_MODE_BREAK // pulls UPDI line low
 } updi_bridge_mode;
 
-
 `endif

@@ -34,39 +34,39 @@ module uart_rx #(
 	// state machine
 	always_ff @(posedge clk) begin
 		if (rst) begin
-			state = UART_IDLE;
-			rx_data = 'b0;
-			rx_data_valid = 'b0;
-			rx_error = 'b0;
+			state <= UART_IDLE;
+			rx_data <= 'b0;
+			rx_data_valid <= 'b0;
+			rx_error <= 'b0;
 		end
 		else begin
 			// no START or STOP state since they are ignored
 			case (state)
 				UART_IDLE: begin
-					frame = 'b0;
-					counter = 'b0;
+					frame <= 'b0;
+					counter <= 'b0;
 
-					rx_data_valid = 'b0;
-					rx_error = 'b0;
+					rx_data_valid <= 'b0;
+					rx_error <= 'b0;
 
 					// a RX of 0 indicates a start bit
 					if (rx == 'b0) begin
-						state = UART_DATA;
+						state <= UART_DATA;
 					end
 				end
 
 				UART_DATA: begin
 					// this state includes the collection of the parity bit,
 					// but it is verified in the UART_PARITY state
-					frame[counter] = rx;
+					frame[counter] <= rx;
 
 					// if done, go to parity check, otherwise keep reading
 					if (counter == FRAME_BITS-1) begin
-						state = UART_PARITY;
+						state <= UART_PARITY;
 					end
 					else begin
-						counter = counter + 'b1;
-						state = UART_DATA;
+						counter <= counter + 'b1;
+						state <= UART_DATA;
 					end
 				end
 
@@ -74,15 +74,15 @@ module uart_rx #(
 					// check parity, if OK update output registers, otherwise
 					// set error flag
 					if (expected_parity == frame_parity) begin
-						rx_data = data;
-						rx_data_valid = 'b1;
+						rx_data <= data;
+						rx_data_valid <= 'b1;
 					end
 					else begin
-						rx_error = 'b1;
+						rx_error <= 'b1;
 					end
 
 					// either way, go back to IDLE
-					state = UART_IDLE;
+					state <= UART_IDLE;
 				end
 			endcase
 		end

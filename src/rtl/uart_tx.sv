@@ -25,82 +25,82 @@ module uart_tx #(
 	// UART state machine
 	always_ff @(posedge clk) begin
 		if (rst) begin
-			state = UART_IDLE;
-			ready = 'b0;
-			tx = 'b1;
+			state <= UART_IDLE;
+			ready <= 'b0;
+			tx <= 'b1;
 		end
 		else begin
 			case (state)
 				UART_IDLE: begin
-					// idle is 1
-					ready = 'b1;
-					tx = 'b1;
-
-					// handle going to start bit
+					// idle until start signal
 					if (start) begin
-						state = UART_START;
-						ready = 'b0;
-						data = tx_data;
-						counter = 'b0;
+						state <= UART_START;
+						ready <= 'b0;
+						data <= tx_data;
+						counter <= 'b0;
+					end
+					else begin
+						ready <= 'b1;
+						tx <= 'b1;
 					end
 				end
 
 				UART_START: begin
 					// always one 0 bit
-					tx = 'b0;
-					state = UART_DATA;
+					tx <= 'b0;
+					state <= UART_DATA;
 				end
 
 				UART_DATA: begin
 					// handle transmission
-					tx = data[counter]; // LSB
+					tx <= data[counter]; // LSB
 
 					// handle going to next state if applicable
 					if (counter == DATA_BITS-1) begin
 						if (PARITY_BIT == "none") begin
-							state = UART_STOP;
+							state <= UART_STOP;
 						end
 						else begin
-							state = UART_PARITY;
+							state <= UART_PARITY;
 						end
 					end
 					else begin
 						// otherwise just keep going through data bits
-						counter = counter + 'b1;
-						state = UART_DATA;
+						counter <= counter + 'b1;
+						state <= UART_DATA;
 					end
 				end
 
 				UART_PARITY: begin
 					// handle parity, parity_result is always odd parity
 					case (PARITY_BIT)
-						"even": tx = ~parity_result;
-						"odd": tx = parity_result;
+						"even": tx <= ~parity_result;
+						"odd": tx <= parity_result;
 					endcase
 
 					// for just 1 stop bit, simply going back to idle is
 					// enough since it will pull TX high
 					if (STOP_BITS > 1) begin
-						counter = 'b1;
-						state = UART_STOP;
+						counter <= STOP_BITS;
+						state <= UART_STOP;
 					end
 					else begin
-						state = UART_IDLE;
+						state <= UART_IDLE;
 					end
 				end
 
 				UART_STOP: begin
 					// handle stop bit(s)
-					tx = 'b1;
+					tx <= 'b1;
 
-					counter = counter + 'b1;
-					if (counter < STOP_BITS) begin
+					if (counter != 'b1) begin
 						// have to repeat for multiple stop bits
-						state = UART_STOP;
+						counter <= counter - 'b1;
+						state <= UART_STOP;
 					end
 					else begin
-						state = UART_IDLE;
-						ready = 'b1;
+						state <= UART_IDLE;
+						ready <= 'b1;
 					end
 				end
 			endcase

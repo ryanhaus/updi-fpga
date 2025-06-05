@@ -17,7 +17,7 @@ module rom #(
 
 	// handle reading
 	always_ff @(posedge clk) begin
-		out = data[addr];
+		out <= data[addr];
 	end
 
 endmodule

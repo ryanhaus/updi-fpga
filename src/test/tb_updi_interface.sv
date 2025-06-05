@@ -50,12 +50,12 @@ module tb_updi_interface();
 		.uart_tx_fifo_full(uart_tx_fifo_full)
 	);
 
-	// fifo instance (for TX output, negedge)
+	// fifo instance (for TX output)
 	logic [7:0] tx_out_fifo_data;
 	logic tx_out_fifo_rd_en, tx_out_fifo_empty;
 
 	fifo #(.DEPTH(FIFO_DEPTH)) tx_out_fifo (
-		.clk(~clk),
+		.clk(clk),
 		.rst(rst),
 		.in(uart_tx_fifo_data),
 		.out(tx_out_fifo_data),
@@ -65,12 +65,12 @@ module tb_updi_interface();
 		.full(uart_tx_fifo_full)
 	);
 	
-	// fifo instance (for RX input, negedge)
+	// fifo instance (for RX input)
 	logic [7:0] rx_in_fifo_data;
 	logic rx_in_fifo_wr_en, rx_in_fifo_full;
 
 	fifo #(.DEPTH(FIFO_DEPTH)) rx_in_fifo (
-		.clk(~clk),
+		.clk(clk),
 		.rst(rst),
 		.in(rx_in_fifo_data),
 		.out(uart_rx_fifo_data),
@@ -80,11 +80,11 @@ module tb_updi_interface();
 		.full(rx_in_fifo_full)
 	);
 
-	// fifo instance (for RX output, negedge)
+	// fifo instance (for RX output)
 	logic [7:0] rx_out_fifo_data;
 	logic rx_out_fifo_rd_en, rx_out_fifo_empty;
 	fifo #(.DEPTH(FIFO_DEPTH)) rx_out_fifo (
-		.clk(~clk),
+		.clk(clk),
 		.rst(rst),
 		.in(out_rx_fifo_data),
 		.out(rx_out_fifo_data),
@@ -97,6 +97,7 @@ module tb_updi_interface();
 	// testbench logic
 	integer i;
 
+	initial #100000 $error();
 	initial begin
 		$dumpfile("trace/tb_updi_interface.vcd");
 		$dumpvars();
@@ -107,11 +108,7 @@ module tb_updi_interface();
 
 		#10 clk = 'b1;
 		#10 clk = 'b0;
-		#10 clk = 'b1;
-		#10 clk = 'b0;
 		rst = 'b0;
-		#10 clk = 'b1;
-		#10 clk = 'b0;
 
 		// send a test instruction with ACK expected
 		instruction = UPDI_ST;

@@ -11,12 +11,12 @@ module updi_bridge_controller (
 
 	always_comb begin
 		if (override_en) begin
-			bridge_mode = override_value
+			bridge_mode <= override_value
 				? UPDI_BRIDGE_MODE_IDLE
 				: UPDI_BRIDGE_MODE_BREAK;
 		end
 		else begin
-			bridge_mode = wr_en
+			bridge_mode <= wr_en
 				? UPDI_BRIDGE_MODE_TX
 				: UPDI_BRIDGE_MODE_RX;
 		end

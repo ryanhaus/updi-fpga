@@ -55,7 +55,7 @@ module tb_uart_fifo();
 		rx_fifo_rd_en = 'b0;
 		rst = 'b1;
 
-		#20
+		#200
 		rst = 'b0;
 
 		// test UART FIFO with a loopback, write to FIFO first

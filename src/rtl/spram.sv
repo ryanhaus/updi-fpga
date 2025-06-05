@@ -30,18 +30,18 @@ module spram #(
 	always @(posedge clk) begin
 		if (rst && DELETE_ON_RESET) begin
 			for (i = 0; i < SIZE; i = i + 1)
-				mem[i] = 'b0;
+				mem[i] <= 'b0;
 		end
 		else begin
 			case (mode)
 				SPRAM_IDLE: begin end
 
 				SPRAM_READ: begin
-					data_rd = mem[rd_addr];
+					data_rd <= mem[rd_addr];
 				end
 
 				SPRAM_WRITE: begin
-					mem[wr_addr] = data_wr;
+					mem[wr_addr] <= data_wr;
 				end
 			endcase
 		end

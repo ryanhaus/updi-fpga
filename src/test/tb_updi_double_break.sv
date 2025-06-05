@@ -1,7 +1,7 @@
 // testbench for updi_double_break
 module tb_updi_double_break();
 
-	parameter N_CLKS = 100;
+	parameter N_CLKS = 10;
 
 	logic clk, rst, start, busy, pulse;
 	updi_double_break #(.PULSE_CLK(N_CLKS)) dut (clk, rst, start, busy, pulse);
@@ -32,7 +32,7 @@ module tb_updi_double_break();
 		clk = 'b0;
 		start = 'b0;
 
-		i = 1; // including last clock cycle
+		i = 0;
 
 		while (busy && pulse == 'b0) begin
 			#10

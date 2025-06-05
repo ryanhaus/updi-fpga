@@ -31,21 +31,21 @@ module fifo #(
 
 	always_ff @(posedge clk) begin
 		if (rst) begin
-			out = 'b0;
-			rd_ptr = 'b0;
-			wr_ptr = 'b0;
+			out <= 'b0;
+			rd_ptr <= 'b0;
+			wr_ptr <= 'b0;
 		end
 		else begin
 			// handle a read
 			if (rd_en && !empty) begin
-				out = memory[rd_ptr];
-				rd_ptr = next_rd_ptr;
+				out <= memory[rd_ptr];
+				rd_ptr <= next_rd_ptr;
 			end
 
 			// handle a write
 			if (wr_en && !full) begin
-				memory[wr_ptr] = in;
-				wr_ptr = next_wr_ptr;
+				memory[wr_ptr] <= in;
+				wr_ptr <= next_wr_ptr;
 			end
 		end
 	end

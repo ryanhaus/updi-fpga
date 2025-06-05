@@ -86,19 +86,21 @@ module uart_fifo #(
 	logic prev_rx_data_valid; // used for edge detection on rx_data_valid
 
 	always_ff @(negedge clk) begin
-		rx_fifo_wr_en = 'b0;
-
 		if (rst) begin
-			prev_rx_data_valid = 'b0;
+			prev_rx_data_valid <= 'b0;
+			rx_fifo_wr_en <= 'b0;
 		end
 		else begin
 			if (prev_rx_data_valid == 'b0 && rx_data_valid == 'b1) begin
 				// positive edge of rx_data_valid:
 				// write to rx fifo
-				rx_fifo_wr_en = 'b1;
+				rx_fifo_wr_en <= 'b1;
+			end
+			else begin
+				rx_fifo_wr_en <= 'b0;
 			end
 
-			prev_rx_data_valid = rx_data_valid;
+			prev_rx_data_valid <= rx_data_valid;
 		end
 	end
 
@@ -107,53 +109,59 @@ module uart_fifo #(
 	logic queue_transmit_start; // set transmit_start on the next clock cycle
 
 	always_ff @(negedge clk) begin
-		tx_fifo_rd_en = 'b0;
 
 		if (rst) begin
-			queue_transmit_start = 'b0;
+			queue_transmit_start <= 'b0;
+			tx_fifo_rd_en <= 'b0;
 		end
 		else begin
 			// TX state machine
 			case (tx_state)
 				UART_FIFO_TX_IDLE: begin
 					// wait idle until there is data available in FIFO
+					tx_fifo_rd_en <= 'b0;
+
 					if (!tx_fifo_empty) begin
-						tx_state = UART_FIFO_TX_READ_FIFO;
+						tx_state <= UART_FIFO_TX_READ_FIFO;
 					end
 				end
 
 				UART_FIFO_TX_READ_FIFO: begin
 					// pop a value from the FIFO
-					tx_fifo_rd_en = 'b1;
+					tx_fifo_rd_en <= 'b1;
 
 					// if UART is ready, start transmission, otherwise wait
 					if (transmit_ready) begin
-						tx_state = UART_FIFO_TX_TRANSMISSION_START;
+						tx_state <= UART_FIFO_TX_TRANSMISSION_START;
 					end
 					else begin
-						tx_state = UART_FIFO_TX_WAIT_UART_READY;
+						tx_state <= UART_FIFO_TX_WAIT_UART_READY;
 					end
 				end
 
 				UART_FIFO_TX_WAIT_UART_READY: begin
 					// wait until UART is ready for transmission
+					tx_fifo_rd_en <= 'b0;
+
 					if (transmit_ready) begin
-						tx_state = UART_FIFO_TX_TRANSMISSION_START;
+						tx_state <= UART_FIFO_TX_TRANSMISSION_START;
 					end
 				end
 
 				UART_FIFO_TX_TRANSMISSION_START: begin
 					// attempt to start transmission until the UART
 					// "acknowledges" it by setting transmit_ready low
-					transmit_start = 'b1;
+					transmit_start <= 'b1;
+					tx_fifo_rd_en <= 'b0;
+
 					if (!transmit_ready) begin
 						// if there is still data, skip going back to idle and
 						// start processing that data
 						if (!tx_fifo_empty) begin
-							tx_state = UART_FIFO_TX_READ_FIFO;
+							tx_state <= UART_FIFO_TX_READ_FIFO;
 						end
 						else begin
-							tx_state = UART_FIFO_TX_IDLE;
+							tx_state <= UART_FIFO_TX_IDLE;
 						end
 					end
 				end

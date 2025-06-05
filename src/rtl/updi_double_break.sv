@@ -23,37 +23,42 @@ module updi_double_break #(
 
 	always_ff @(posedge clk) begin
 		if (rst) begin
-			counter = 'b0;
-			pulse_n = 'b0;
-			busy = 'b0;
-			pulse = 'b0;
+			counter <= 'b0;
+			pulse_n <= 'b0;
+			busy <= 'b0;
 		end
 		else begin
-			pulse = 'b0;
-
 			if (busy) begin
-				counter = counter + 'b1;
-
-				if (counter == PULSE_CLK) begin
+				if (counter == 'b0) begin
 					// counter done, move to next pulse
-					counter = 'b0;
-					pulse_n = pulse_n + 'b1;
+					counter <= PULSE_CLK - 1;
 
-					if (pulse_n == 'd3) begin
-						// pulses done
-						pulse_n = 'b0;
-						busy = 'b0;
+					// if done reset, otherwise keep counting pulses
+					if (pulse_n == 'd2) begin
+						pulse_n <= 'b0;
+						busy <= 'b0;
+					end
+					else begin
+						pulse_n <= pulse_n + 'b1;
 					end
 				end
+				else begin
+					counter <= counter - 'b1;
+				end
 
-				pulse = (pulse_n & 'b1) == 'b1;
 			end
 			else if (start) begin
-				busy = 'b1;
-				counter = 'b1;
-				pulse_n = 'b0;
+				busy <= 'b1;
+				counter <= PULSE_CLK-1;
+				pulse_n <= 'b0;
 			end
 		end
+	end
+
+	always_comb begin
+		pulse = busy
+			? (pulse_n & 'b1) == 'b1
+			: 'b1;
 	end
 
 endmodule
