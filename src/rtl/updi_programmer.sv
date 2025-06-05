@@ -86,13 +86,13 @@ module updi_programmer #(
 	) rom_inst (
 		.clk(clk),
 		.rst(rst),
-		.start(),
-		.ready(),
-		.done(),
-		.block_length(),
-		.block_address(),
-		.block_type(),
-		.block_data()
+		.start(program_start),
+		.ready(program_ready),
+		.done(program_done),
+		.block_length(program_block_length),
+		.block_address(program_block_address),
+		.block_type(program_block_type),
+		.block_data(program_block_data)
 	);
 
 	// UPDI interface instance
@@ -102,31 +102,31 @@ module updi_programmer #(
 	) interface_inst (
 		.clk(clk),
 		.rst(rst),
-		.instruction(),
-		.size_a(),
-		.size_b(),
-		.ptr(),
-		.cs_addr(),
-		.sib(),
-		.size_c(),
-		.data(),
-		.data_len(),
-		.wait_ack_after(),
-		.tx_start(),
-		.tx_ready(),
-		.rx_n_bytes(),
-		.rx_start(),
-		.rx_ready(),
-		.ack_error(),
-		.out_rx_fifo_data(),
-		.out_rx_fifo_wr_en(),
-		.out_rx_fifo_full(),
-		.uart_rx_fifo_data(),
-		.uart_rx_fifo_rd_en(),
-		.uart_rx_fifo_empty(),
-		.uart_tx_fifo_data(),
-		.uart_tx_fifo_wr_en(),
-		.uart_tx_fifo_full()
+		.instruction(instruction),
+		.size_a(instr_size_a),
+		.size_b(instr_size_b),
+		.ptr(instr_ptr),
+		.cs_addr(instr_cs_addr),
+		.sib(instr_sib),
+		.size_c(instr_size_c),
+		.data(instr_data),
+		.data_len(instr_data_len),
+		.wait_ack_after(instr_wait_ack_after),
+		.tx_start(interface_tx_start),
+		.tx_ready(interface_tx_ready),
+		.rx_n_bytes(interface_rx_n_bytes),
+		.rx_start(interface_rx_start),
+		.rx_ready(interface_rx_ready),
+		.ack_error(interface_ack_error),
+		.out_rx_fifo_data(out_rx_fifo_data_in),
+		.out_rx_fifo_wr_en(out_rx_fifo_wr_en),
+		.out_rx_fifo_full(out_rx_fifo_full),
+		.uart_rx_fifo_data(uart_rx_fifo_data_out),
+		.uart_rx_fifo_rd_en(uart_rx_fifo_rd_en),
+		.uart_rx_fifo_empty(uart_rx_fifo_empty),
+		.uart_tx_fifo_data(uart_tx_fifo_data_in),
+		.uart_tx_fifo_wr_en(uart_tx_fifo_wr_en),
+		.uart_tx_fifo_full(uart_tx_fifo_full)
 	);
 
 	// RX output FIFO instance
@@ -135,12 +135,12 @@ module updi_programmer #(
 	) rx_out_fifo_inst (
 		.clk(clk),
 		.rst(rst),
-		.in(),
-		.out(),
-		.rd_en(),
-		.wr_en(),
-		.empty(),
-		.full()
+		.in(out_rx_fifo_data),
+		.out(out_rx_fifo_data_out),
+		.rd_en(out_rx_fifo_rd_en),
+		.wr_en(out_rx_fifo_wr_en),
+		.empty(out_rx_fifo_empty),
+		.full(out_rx_fifo_full)
 	);
 
 	// UPDI PHY instance
@@ -148,17 +148,17 @@ module updi_programmer #(
 		.UART_FIFO_DEPTH(UART_FIFO_DEPTH)
 	) phy_inst (
 		.clk(clk),
-		.uart_clk(),
+		.uart_clk(uart_clk),
 		.rst(rst),
-		.uart_tx_fifo_data(),
-		.uart_tx_fifo_wr_en(),
-		.uart_tx_fifo_full(),
-		.uart_rx_fifo_data(),
-		.uart_rx_fifo_rd_en(),
-		.uart_rx_fifo_empty(),
-		.rx_error(),
-		.double_break_start(),
-		.double_break_busy(),
+		.uart_tx_fifo_data(uart_tx_fifo_data),
+		.uart_tx_fifo_wr_en(uart_tx_fifo_wr_en),
+		.uart_tx_fifo_full(uart_tx_fifo_full),
+		.uart_rx_fifo_data(uart_rx_fifo_data),
+		.uart_rx_fifo_rd_en(uart_rx_fifo_rd_en),
+		.uart_rx_fifo_empty(uart_rx_fifo_empty),
+		.rx_error(phy_rx_error),
+		.double_break_start(double_break_start),
+		.double_break_busy(double_break_busy),
 		.updi(updi)
 	);
 	
