@@ -34,7 +34,10 @@ module updi_programmer #(
 
 	// control signals
 	input logic start,
-	output logic busy
+	output logic busy,
+
+	// UPDI output
+	output updi
 );
 
 	// program ROM instance
@@ -118,7 +121,7 @@ module updi_programmer #(
 		.rx_error(),
 		.updi_override_en(),
 		.updi_override_value(),
-		.updi()
+		.updi(updi)
 	);
 
 	// double break instance
