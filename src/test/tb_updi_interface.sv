@@ -98,7 +98,7 @@ module tb_updi_interface();
 	integer i;
 
 	initial begin
-		$dumpfile("trace/tb_updi_interface.sv");
+		$dumpfile("trace/tb_updi_interface.vcd");
 		$dumpvars();
 
 		// reset
