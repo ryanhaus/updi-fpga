@@ -25,6 +25,7 @@ module updi_programmer #(
 	parameter DATA_BLOCK_MAX_SIZE = 2 ** (DATA_ADDR_BITS + 1),
 
 	parameter UART_FIFO_DEPTH = 16,
+	parameter RX_OUT_FIFO_DEPTH = 16,
 
 	parameter UPDI_DOUBLE_BREAK_PULSE_CLK = 100000
 ) (
@@ -85,6 +86,20 @@ module updi_programmer #(
 		.uart_tx_fifo_data(),
 		.uart_tx_fifo_wr_en(),
 		.uart_tx_fifo_full()
+	);
+
+	// RX output FIFO instance
+	fifo #(
+		.DEPTH(RX_OUT_FIFO_DEPTH)
+	) rx_out_fifo_inst (
+		.clk(clk),
+		.rst(rst),
+		.in(),
+		.out(),
+		.rd_en(),
+		.wr_en(),
+		.empty(),
+		.full()
 	);
 
 	// UPDI PHY instance
