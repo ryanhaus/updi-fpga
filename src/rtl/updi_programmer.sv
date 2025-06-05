@@ -38,6 +38,46 @@ module updi_programmer #(
 	output updi
 );
 
+	// signals
+	// ROM signals
+	logic program_start, program_ready, program_done;
+	logic [7:0] program_block_length, program_block_type;
+	logic [15:0] program_block_address;
+	logic [7:0] program_block_data [DATA_BLOCK_MAX_SIZE];
+
+	// interface signals
+	updi_instruction instruction;
+	logic instr_sib;
+	logic [1:0] instr_size_a, instr_size_b, instr_ptr, instr_size_c;
+	logic [3:0] instr_cs_addr;
+
+	logic [7:0] instr_data [MAX_DATA_SIZE];
+	logic [DATA_ADDR_BITS-1 : 0] instr_data_len;
+	logic [MAX_DATA_SIZE-1 : 0] instr_wait_ack_after;
+
+	logic interface_tx_start, interface_tx_ready;
+	logic interface_rx_start, interface_rx_ready, interface_ack_error;
+	logic [DATA_ADDR_BITS-1 : 0] interface_rx_n_bytes;
+
+	logic [7:0] out_rx_fifo_data_in;
+	logic out_rx_fifo_wr_en, out_rx_fifo_full;
+
+	logic [7:0] uart_rx_fifo_data_out;
+	logic uart_rx_fifo_rd_en, uart_rx_fifo_empty;
+	
+	logic [7:0] uart_tx_fifo_data_in;
+	logic uart_tx_fifo_wr_en, uart_tx_fifo_full;
+
+	// RX out FIFO signals
+	logic [7:0] out_rx_fifo_data_out;
+	logic out_rx_fifo_rd_en, out_rx_fifo_empty;
+
+	// PHY signals
+	logic phy_rx_error;
+	logic uart_clk;
+	logic double_break_start, double_break_busy;
+
+
 	// program ROM instance
 	program_rom #(
 		.FILE_NAME(ROM_FILE_NAME),
