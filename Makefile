@@ -1,11 +1,4 @@
-# lint all verilog
-lint:
-	verilator \
-		-y src/rtl \
-		src/*/*.sv \
-		-sv \
-		--lint-only \
-		--top-module top
+all: test
 
 # for converting Intel hex file to a file readable by Verilog
 PROG_HEX := res/program.hex
@@ -18,10 +11,41 @@ $(PROG_MEM): $(PROG_HEX)
 # for building all generated files
 generated: $(generated_objects)
 
+ROM_NAME := $(patsubst src/%,%,$(PROG_MEM))
+VERILATOR_FLAGS += -DROM_NAME=\"$(ROM_NAME)\"
+VERILATOR_FLAGS += -DROM_SIZE=$(shell stat -L -c %s $(PROG_MEM))
+
+# lint all verilog
+lint:
+	verilator \
+		$(VERILATOR_FLAGS) \
+		-y src/rtl \
+		src/*/*.sv \
+		-sv \
+		--lint-only \
+		--top-module top
+
+# generate simulation binary
+sim: obj_dir/Vtop
+sim_run: sim
+	./obj_dir/Vtop
+
+obj_dir/Vtop: generated
+	verilator \
+		$(VERILATOR_FLAGS) \
+		-y src/rtl \
+		-sv \
+		--cc \
+		--timing \
+		--trace-fst \
+		--top-module top \
+		src/rtl/*.sv
+
 # build testbench simulation programs w/ matching
 obj_dir/Vtb_%: generated src/test/tb_%.sv src/rtl/%.sv
 	mkdir -p trace
 	verilator \
+		$(VERILATOR_FLAGS) \
 		-y src/rtl \
 		src/*/*.sv \
 		-sv \
