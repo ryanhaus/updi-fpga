@@ -19,7 +19,8 @@ module updi_phy #(
 
 	// UPDI double break interface
 	input double_break_start,
-	output logic double_break_busy,
+	output double_break_busy,
+	output double_break_done,
 
 	// UPDI output
 	output updi
@@ -78,6 +79,7 @@ module updi_phy #(
 		.rst(rst),
 		.start(double_break_start),
 		.busy(double_break_busy),
+		.done(double_break_done),
 		.pulse(double_break_pulse)
 	);
 

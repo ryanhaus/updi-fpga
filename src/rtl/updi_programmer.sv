@@ -75,8 +75,7 @@ module updi_programmer #(
 	// PHY signals
 	logic phy_rx_error;
 	logic uart_clk;
-	logic double_break_start, double_break_busy;
-
+	logic double_break_start, double_break_busy, double_break_done;
 
 	// program ROM instance
 	program_rom #(
@@ -159,6 +158,7 @@ module updi_programmer #(
 		.rx_error(phy_rx_error),
 		.double_break_start(double_break_start),
 		.double_break_busy(double_break_busy),
+		.double_break_done(double_break_done),
 		.updi(updi)
 	);
 	

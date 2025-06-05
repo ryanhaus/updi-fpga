@@ -11,6 +11,7 @@ module updi_double_break #(
 	// control signals
 	input start,
 	output logic busy,
+	output logic done,
 
 	// output
 	output logic pulse
@@ -26,6 +27,7 @@ module updi_double_break #(
 			counter <= 'b0;
 			pulse_n <= 'b0;
 			busy <= 'b0;
+			done <= 'b0;
 		end
 		else begin
 			if (busy) begin
@@ -37,6 +39,7 @@ module updi_double_break #(
 					if (pulse_n == 'd2) begin
 						pulse_n <= 'b0;
 						busy <= 'b0;
+						done <= 'b1;
 					end
 					else begin
 						pulse_n <= pulse_n + 'b1;

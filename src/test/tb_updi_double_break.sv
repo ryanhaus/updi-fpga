@@ -3,8 +3,8 @@ module tb_updi_double_break();
 
 	parameter N_CLKS = 10;
 
-	logic clk, rst, start, busy, pulse;
-	updi_double_break #(.PULSE_CLK(N_CLKS)) dut (clk, rst, start, busy, pulse);
+	logic clk, rst, start, busy, done, pulse;
+	updi_double_break #(.PULSE_CLK(N_CLKS)) dut (clk, rst, start, busy, done, pulse);
 
 	integer i;
 
@@ -81,6 +81,8 @@ module tb_updi_double_break();
 		$display("Pulse 3 took %0d clocks (expected: %0d)", i, N_CLKS);
 
 		if (i != N_CLKS) $error();
+		if (busy) $error();
+		if (!done) $error();
 
 		$finish;
 	end
