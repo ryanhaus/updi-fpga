@@ -49,7 +49,7 @@ test: $(test_objects)
 
 test_run: test
 	mkdir -p trace
-	$(foreach name,$(test_names),obj_dir/V$(name) ;)
+	$(foreach name,$(test_names),echo Running test $(name): ; obj_dir/V$(name) ;)
 	
 # remove obj_dir (build) folder
 clean:
