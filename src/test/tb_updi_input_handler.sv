@@ -50,7 +50,7 @@ module tb_updi_input_handler();
 	integer i;
 
 	initial begin
-		$dumpfile("trace/tb_updi_input_handler.vcd");
+		$dumpfile("trace/tb_updi_input_handler.fst");
 		$dumpvars();
 
 		// reset

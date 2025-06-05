@@ -6,7 +6,7 @@ module tb_parity();
 	parity dut (value, parity);
 
 	initial begin
-		$dumpfile("trace/tb_parity.vcd");
+		$dumpfile("trace/tb_parity.fst");
 		$dumpvars();
 
 		#10 value = 8'b11111111;

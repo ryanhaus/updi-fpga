@@ -9,7 +9,7 @@ module tb_updi_double_break();
 	integer i;
 
 	initial begin
-		$dumpfile("trace/tb_updi_double_break.vcd");
+		$dumpfile("trace/tb_updi_double_break.fst");
 		$dumpvars();
 
 		clk = 'b0;

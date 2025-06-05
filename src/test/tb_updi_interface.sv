@@ -99,7 +99,7 @@ module tb_updi_interface();
 
 	initial #10000 $error();
 	initial begin
-		$dumpfile("trace/tb_updi_interface.vcd");
+		$dumpfile("trace/tb_updi_interface.fst");
 		$dumpvars();
 
 		// reset

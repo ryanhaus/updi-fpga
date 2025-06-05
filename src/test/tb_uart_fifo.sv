@@ -45,7 +45,7 @@ module tb_uart_fifo();
 	end
 
 	initial begin
-    	$dumpfile("trace/tb_uart_fifo.vcd");
+    	$dumpfile("trace/tb_uart_fifo.fst");
     	$dumpvars();
 
 

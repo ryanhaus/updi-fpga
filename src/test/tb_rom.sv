@@ -12,7 +12,7 @@ module tb_rom();
 	integer i;
 
 	initial begin
-		$dumpfile("trace/tb_rom.vcd");
+		$dumpfile("trace/tb_rom.fst");
 		$dumpvars();
 
 		expected[0] = 'h48;

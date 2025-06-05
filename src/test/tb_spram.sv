@@ -10,7 +10,7 @@ module tb_spram();
 	integer i;
 
 	initial begin
-		$dumpfile("trace/tb_spram.vcd");
+		$dumpfile("trace/tb_spram.fst");
 		$dumpvars();
 
 		// test writes

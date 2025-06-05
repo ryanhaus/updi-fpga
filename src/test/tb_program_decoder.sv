@@ -30,7 +30,7 @@ module tb_program_decoder();
 	integer i, block;
 
 	initial begin
-		$dumpfile("trace/tb_program_decoder.vcd");
+		$dumpfile("trace/tb_program_decoder.fst");
 		$dumpvars();
 
 		expected_data[0] = 'h48;

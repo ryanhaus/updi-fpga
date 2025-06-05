@@ -26,7 +26,7 @@ module tb_uart();
 	integer i, j;
 
 	initial begin
-		$dumpfile("trace/tb_uart.vcd");
+		$dumpfile("trace/tb_uart.fst");
 		$dumpvars();
 
 		rx = 'b1;

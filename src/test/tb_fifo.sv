@@ -11,7 +11,7 @@ module tb_fifo();
 	integer i;
 
 	initial begin
-		$dumpfile("trace/tb_fifo.vcd");
+		$dumpfile("trace/tb_fifo.fst");
 		$dumpvars();
 
 		clk = 'b0;
