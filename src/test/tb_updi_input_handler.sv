@@ -16,12 +16,12 @@ module tb_updi_input_handler();
 		out_fifo_data, out_fifo_full, out_fifo_wr_en
 	);
 
-	// input FIFO (negedge)
+	// input FIFO
 	logic [7:0] rx_data;
 	logic rx_fifo_wr_en, rx_fifo_full;
 
 	fifo input_fifo_inst (
-		.clk(~clk),
+		.clk(clk),
 		.rst(rst),
 		.in(rx_data),
 		.out(in_fifo_data),
@@ -31,12 +31,12 @@ module tb_updi_input_handler();
 		.full(rx_fifo_full)
 	);
 
-	// output FIFO (negedge)
+	// output FIFO
 	logic [7:0] tx_data;
 	logic tx_fifo_rd_en, tx_fifo_empty;
 
 	fifo output_fifo_inst (
-		.clk(~clk),
+		.clk(clk),
 		.rst(rst),
 		.in(out_fifo_data),
 		.out(tx_data),
@@ -97,15 +97,15 @@ module tb_updi_input_handler();
 		end
 
 		// read from FIFO, verify is what is expected
-		tx_fifo_rd_en = 'b1;
 		#10 clk = 'b0;
+		tx_fifo_rd_en = 'b1;
 		#10 clk = 'b1;
+		#10 clk = 'b0;
 		tx_fifo_rd_en = 'b0;
 
 		if (tx_data != 'hF0) $error();
 
 		// tell input handler to wait for an ACK
-		#10 clk = 'b0;
 		wait_ack = 'b1;
 		
 		#10 clk = 'b1;
@@ -113,24 +113,26 @@ module tb_updi_input_handler();
 
 		wait_ack = 'b0;
 
-		while (!ready) begin
+		while (!ack_received) begin
 			#10 clk = 'b1;
 			#10 clk = 'b0;
 		end
 
-		#10 clk = 'b1;
-
 		if (!ack_received) $error();
 		if (ack_error) $error();
+
+		#10 clk = 'b1;
+		#10 clk = 'b0;
 
 		// pass remaining 9 values through
 		if (!ready) $error();
 		n_bytes = 'd9;
 		start = 'b1;
 
-		#10 clk = 'b0;
 		#10 clk = 'b1;
+		#10 clk = 'b0;
 		start = 'b0;
+		#10 clk = 'b1;
 
 		while (!ready) begin
 			#10 clk = 'b0;
@@ -151,5 +153,6 @@ module tb_updi_input_handler();
 
 		$finish;
 	end
+	initial #100000 $error();
 
 endmodule

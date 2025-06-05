@@ -1,8 +1,10 @@
 // possible states for updi_input_handler
 typedef enum {
 	UPDI_IN_HDLR_IDLE,
-	UPDI_IN_HDLR_ACK,
-	UPDI_IN_HDLR_NORMAL
+	UPDI_IN_HDLR_READ_ACK,
+	UPDI_IN_HDLR_CHECK_ACK,
+	UPDI_IN_HDLR_FIFO_READ,
+	UPDI_IN_HDLR_FIFO_WRITE
 } updi_input_handler_state;
 
 // Handles receiving input. In ACK mode, a single value of 0x40 is expected to
@@ -38,83 +40,95 @@ module updi_input_handler #(
 
 	updi_input_handler_state state;
 	logic [BITS_N-1 : 0] counter;
-	logic fifo_in_valid; // was in_fifo_rd_en high on the last clock cycle?
+	assign out_fifo_data = in_fifo_data;
 
 	always_ff @(posedge clk) begin
-		in_fifo_rd_en = 'b0;
-		out_fifo_wr_en = 'b0;
-		ack_received = 'b0;
-		ack_error = 'b0;
-
 		if (rst) begin
-			state = UPDI_IN_HDLR_IDLE;
-			ready = 'b0;	
+			state <= UPDI_IN_HDLR_IDLE;
 		end
 		else begin
 			case (state)
 				UPDI_IN_HDLR_IDLE: begin
 					// wait for start or wait_ack
-					ready = 'b1;
-
 					if (start) begin
-						counter = n_bytes;
-						ready = 'b0;
-						in_fifo_rd_en = 'b1;
-						state = UPDI_IN_HDLR_NORMAL;
+						counter <= n_bytes;
+						state <= UPDI_IN_HDLR_FIFO_READ;
 					end
-
-					if (wait_ack) begin
-						ready = 'b0;
-						state = UPDI_IN_HDLR_ACK;
+					else if (wait_ack) begin
+						state <= UPDI_IN_HDLR_READ_ACK;
 					end
 				end
 
-				UPDI_IN_HDLR_ACK: begin
-					// wait for ack, if it hasn't been read already
-					if (!in_fifo_empty && !fifo_in_valid) begin
-						in_fifo_rd_en = 'b1;
+				UPDI_IN_HDLR_READ_ACK: begin
+					if (!in_fifo_empty) begin
+						state <= UPDI_IN_HDLR_CHECK_ACK;
 					end
+				end
 
-					// read ACK
-					if (fifo_in_valid) begin
-						if (in_fifo_data == 'h40) begin
-							ack_received = 'b1;
+				UPDI_IN_HDLR_CHECK_ACK: begin
+					state <= UPDI_IN_HDLR_IDLE;
+				end
+
+				UPDI_IN_HDLR_FIFO_READ: begin
+					if (!in_fifo_empty) begin
+						state <= UPDI_IN_HDLR_FIFO_WRITE;
+					end
+				end
+
+				UPDI_IN_HDLR_FIFO_WRITE: begin
+					if (!out_fifo_full) begin
+						if (counter == 'b1) begin
+							state <= UPDI_IN_HDLR_IDLE;
 						end
 						else begin
-							ack_error = 'b1;
-						end
-
-						ready = 'b1;
-						state = UPDI_IN_HDLR_IDLE;
-					end
-				end
-
-				UPDI_IN_HDLR_NORMAL: begin
-					// read bytes & redirect to output FIFO
-					if (!in_fifo_empty && !out_fifo_full) begin
-						in_fifo_rd_en = 'b1;
-					end
-
-					if (!out_fifo_full) begin
-						if (fifo_in_valid) begin
-							out_fifo_data = in_fifo_data;
-							out_fifo_wr_en = 'b1;
-
-							// figure out when done
-							// counter was set to n bytes to read before start
-							counter = counter - 'b1;
-							if (counter == 'b0) begin
-								in_fifo_rd_en = 'b0;
-								ready = 'b1;
-								state = UPDI_IN_HDLR_IDLE;
-							end
+							counter <= counter - 'b1;
+							state <= UPDI_IN_HDLR_FIFO_READ;
 						end
 					end
 				end
 			endcase
-
-			fifo_in_valid = in_fifo_rd_en;
 		end
+	end
+
+	always_comb begin
+		ready = 'b0;
+		in_fifo_rd_en = 'b0;
+		out_fifo_wr_en = 'b0;
+		ack_received = 'b0;
+		ack_error = 'b0;
+
+		case (state)
+			UPDI_IN_HDLR_IDLE: begin
+				ready = 'b1;
+			end
+
+			UPDI_IN_HDLR_READ_ACK: begin
+				in_fifo_rd_en = 'b1;
+			end
+
+			UPDI_IN_HDLR_CHECK_ACK: begin
+				in_fifo_rd_en = 'b0;
+
+				if (in_fifo_data == 'h40) begin
+					ack_received = 'b1;
+				end
+				else begin
+					ack_error = 'b0;
+				end
+			end
+
+			UPDI_IN_HDLR_FIFO_READ: begin
+				if (!in_fifo_empty) begin
+					in_fifo_rd_en = 'b1;
+				end
+			end
+
+			UPDI_IN_HDLR_FIFO_WRITE: begin
+				if (!out_fifo_full) begin
+					out_fifo_wr_en = 'b1;
+				end
+			end
+		endcase
 	end
 
 endmodule
