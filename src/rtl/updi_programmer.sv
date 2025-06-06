@@ -27,7 +27,8 @@ module updi_programmer #(
 	parameter UART_FIFO_DEPTH = 16,
 	parameter RX_OUT_FIFO_DEPTH = 16,
 
-	parameter UART_CLK_DIV = 10
+	parameter UART_CLK_DIV = 10,
+	parameter DOUBLE_BREAK_PULSE_CLK = 100000
 ) (
 	input clk,
 	input rst,
@@ -147,6 +148,7 @@ module updi_programmer #(
 	// UPDI PHY instance
 	updi_phy #(
 		.UART_FIFO_DEPTH(UART_FIFO_DEPTH),
+		.DOUBLE_BREAK_PULSE_CLK(DOUBLE_BREAK_PULSE_CLK),
 		.UART_CLK_DIV(UART_CLK_DIV)
 	) phy_inst (
 		.clk(clk),
