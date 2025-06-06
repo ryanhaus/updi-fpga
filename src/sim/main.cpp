@@ -42,6 +42,13 @@ int main(int argc, char** argv)
 	top->rst = 0;
 	clk();
 
+	// start
+	top->start = 1;
+	clk();
+
+	top->start = 0;
+	clk();
+
 	while (time_ps < MAX_TIME_PS)
 	{
 		clk();
