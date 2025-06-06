@@ -4,8 +4,9 @@ module tb_uart_fifo();
   	parameter PARITY_BIT = "even";
   	parameter STOP_BITS = 2;
   	parameter FIFO_DEPTH = 16;
+	parameter UART_CLK_DIV = 10;
 
-  	logic uart_clk, clk, rst;
+  	logic clk, rst;
   	logic [DATA_BITS-1 : 0] tx_data, rx_data;
   	logic tx_fifo_wr_en, rx_fifo_rd_en;
   	logic tx_fifo_full, tx_fifo_empty;
@@ -13,9 +14,8 @@ module tb_uart_fifo();
   	logic rx_error, uart_busy;
   	logic tx;
 
-  	uart_fifo #(DATA_BITS, PARITY_BIT, STOP_BITS, FIFO_DEPTH) dut (
+  	uart_fifo #(DATA_BITS, PARITY_BIT, STOP_BITS, FIFO_DEPTH, UART_CLK_DIV) dut (
   	  .clk(clk),
-  	  .uart_clk(uart_clk),
   	  .rst(rst),
   	  .tx_data(tx_data),
   	  .rx_data(rx_data),
@@ -32,12 +32,6 @@ module tb_uart_fifo();
   	);
 
   	integer i;
-
-  	initial begin
-		// make uart clk 1/10th logic clk
-		uart_clk = 'b0;
-		forever #100 uart_clk = ~uart_clk;
-	end
 
 	initial begin
 		clk = 'b0;

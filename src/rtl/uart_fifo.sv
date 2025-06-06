@@ -11,10 +11,10 @@ module uart_fifo #(
 	parameter DATA_BITS = 8, // 5 - 9
 	parameter PARITY_BIT = "none", // "none", "even", or "odd"
 	parameter STOP_BITS = 1, // 1 - 2
-	parameter FIFO_DEPTH = 16 // how many values
+	parameter FIFO_DEPTH = 16, // how many values
+	parameter UART_CLK_DIV = 10
 ) (
 	input clk,
-	input uart_clk,
 	input rst,
 
 	input [DATA_BITS-1 : 0] tx_data,
@@ -46,8 +46,8 @@ module uart_fifo #(
 	wire rx_data_valid;
 
 	// UART instance
-	uart #(DATA_BITS, PARITY_BIT, STOP_BITS) uart_inst (
-		.clk(uart_clk),
+	uart #(DATA_BITS, PARITY_BIT, STOP_BITS, UART_CLK_DIV) uart_inst (
+		.clk(clk),
 		.rst(rst),
 		.tx_data(tx_data_current),
 		.transmit_start(transmit_start),

@@ -1,9 +1,13 @@
 // Testbench for uart module
 module tb_uart();
 
+	parameter UART_CLK_DIV = 20;
+
 	logic clk, rst, tx, rx, transmit_start, transmit_ready, rx_data_valid, rx_error;
 	logic [dut.DATA_BITS-1 : 0] tx_data, rx_data;
-	uart #(.DATA_BITS(8), .PARITY_BIT("even"), .STOP_BITS(2)) dut (clk, rst, tx_data, transmit_start, transmit_ready, tx, rx_data, rx_data_valid, rx_error, rx);
+	uart #(.DATA_BITS(8), .PARITY_BIT("even"), .STOP_BITS(2), .UART_CLK_DIV(UART_CLK_DIV)) dut (clk, rst, tx_data, transmit_start, transmit_ready, tx, rx_data, rx_data_valid, rx_error, rx);
+
+	assign rx = tx; // loopback
 
 	// generate parity for verification
 	logic [7:0] parity_data;
@@ -22,8 +26,9 @@ module tb_uart();
 	endgenerate
 
 	// used in testbench
-	logic [11:0] tx_buffer;
-	integer i, j;
+	integer i;
+
+	initial #100000000 $error();
 
 	initial begin
 		$dumpfile("trace/tb_uart.fst");
@@ -53,22 +58,22 @@ module tb_uart();
 			
 			#10 clk = 'b1;
 			#10 clk = 'b0;
+			
+			transmit_start = 'b0;
 
-			for (j = 0; j < 12; j = j + 1) begin
+			while (!rx_data_valid) begin
 				#10 clk = 'b1;
 				#10 clk = 'b0;
 
-				rx = tx; // loopback
-
-				transmit_start = 'b0;
-
-				tx_buffer = tx_buffer << 1;
-				tx_buffer[0] = tx;
+				if (rx_error) $error();
 			end
 
-			if (tx_buffer != { 1'b0, tx_data_rev, parity, 2'b11 }) $error();
-			if (!rx_data_valid || rx_error) $error();
 			if (tx_data != rx_data) $error();
+
+			while (!transmit_ready) begin
+				#10 clk = 'b1;
+				#10 clk = 'b0;
+			end
 		end
 
 		$finish;

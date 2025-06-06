@@ -11,7 +11,8 @@ typedef enum {
 module uart #(
 	parameter DATA_BITS = 8, // 5 - 9
 	parameter PARITY_BIT = "none", // "none", "even", or "odd"
-	parameter STOP_BITS = 1 // 1 - 2
+	parameter STOP_BITS = 1, // 1 - 2
+	parameter UART_CLK_DIV = 10
 ) (
 	input clk,
 	input rst,
@@ -30,9 +31,9 @@ module uart #(
 );
 
 	// transmit
-	uart_tx #(DATA_BITS, PARITY_BIT, STOP_BITS) tx_module (clk, rst, tx_data, transmit_start, transmit_ready, tx);
+	uart_tx #(DATA_BITS, PARITY_BIT, STOP_BITS, UART_CLK_DIV) tx_module (clk, rst, tx_data, transmit_start, transmit_ready, tx);
 		
 	// receive
-	uart_rx #(DATA_BITS, PARITY_BIT) rx_module (clk, rst, rx_data, rx_data_valid, rx_error, rx);
+	uart_rx #(DATA_BITS, PARITY_BIT, UART_CLK_DIV) rx_module (clk, rst, rx_data, rx_data_valid, rx_error, rx);
 
 endmodule
