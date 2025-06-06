@@ -11,8 +11,7 @@ $(PROG_MEM): $(PROG_HEX)
 # for building all generated files
 generated: $(generated_objects)
 
-ROM_NAME := $(patsubst src/%,%,$(PROG_MEM))
-VERILATOR_FLAGS += -DROM_NAME=\"$(ROM_NAME)\"
+VERILATOR_FLAGS += -DROM_NAME=\"$(PROG_MEM)\"
 VERILATOR_FLAGS += -DROM_SIZE=$(shell stat -L -c %s $(PROG_MEM))
 
 # lint all verilog
@@ -28,6 +27,7 @@ lint:
 # generate simulation binary
 sim: obj_dir/Vtop
 sim_run: sim
+	mkdir -p trace
 	./obj_dir/Vtop
 
 obj_dir/Vtop: generated
@@ -36,10 +36,13 @@ obj_dir/Vtop: generated
 		-y src/rtl \
 		-sv \
 		--cc \
-		--timing \
+		--build \
+		--exe \
+		--no-unlimited-stack \
 		--trace-fst \
 		--top-module top \
-		src/rtl/*.sv
+		src/rtl/*.sv \
+		src/sim/main.cpp
 
 # build testbench simulation programs w/ matching
 obj_dir/Vtb_%: generated src/test/tb_%.sv src/rtl/%.sv
@@ -62,6 +65,7 @@ test_%: obj_dir/Vtb_%
 	@: # make doesn't recognize this unless there's something in the body for some ungodly reason
 
 test_run_%: obj_dir/Vtb_%
+	mkdir -p trace
 	obj_dir/Vtb_$*
 
 # for building and running all testbenches
