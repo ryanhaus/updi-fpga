@@ -3,25 +3,47 @@
 #include "Vtop.h"
 #include "verilated_fst_c.h"
 
+VerilatedContext* ctx;
+VerilatedFstC* m_trace;
+Vtop* top;
+
+// does a clock cycle
+void clk()
+{
+	static uint64_t time_ps = 0;
+
+	top->clk = 0;
+	top->eval();
+	m_trace->dump(time_ps += 10);
+
+	top->clk = 1;
+	top->eval();
+	m_trace->dump(time_ps += 10);
+}
+
 int main(int argc, char** argv)
 {
     Verilated::debug(0);
-	VerilatedContext* ctx = new VerilatedContext;
+	ctx = new VerilatedContext;
     ctx->traceEverOn(true);
     ctx->commandArgs(argc, argv);
 
-	Vtop* top = new Vtop;
+	top = new Vtop;
 
-	VerilatedFstC* m_trace = new VerilatedFstC;
+	m_trace = new VerilatedFstC;
 	top->trace(m_trace, 99);
 	m_trace->open("trace/top.fst");
-	uint64_t time_ps = 0;
 
-	for (int i = 0; i < 10000; i++)
+	// reset
+	top->rst = 1;
+	clk();
+
+	top->rst = 0;
+	clk();
+
+	for (int i = 2; i < 500000; i++)
 	{
-		top->clk = ~top->clk;
-		top->eval();
-		m_trace->dump(time_ps += 10);
+		clk();
 	}
 
     // Simulate until $finish
