@@ -1,8 +1,8 @@
 // Divides an incoming clock signal by a given amount. Output is 1 for one
 // clock cycle every N clock cycles
 module clock_divider #(
-	parameter DIV = 10, // how many clock cycles for each pulse
-	parameter SHIFT = 0 // how many clock cycles to delay the pulse, think phase shift
+	parameter DIV = 10, // how many clock cycles between each pulse
+	parameter SHIFT = DIV-1 // how many clock cycles it takes for the first pulse
 ) (
 	input clk_in,
 	input rst,
