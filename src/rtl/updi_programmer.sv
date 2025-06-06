@@ -25,7 +25,9 @@ module updi_programmer #(
 	parameter DATA_BLOCK_MAX_SIZE = 2 ** (DATA_ADDR_BITS + 1),
 
 	parameter UART_FIFO_DEPTH = 16,
-	parameter RX_OUT_FIFO_DEPTH = 16
+	parameter RX_OUT_FIFO_DEPTH = 16,
+
+	parameter UART_CLK_DIV = 10
 ) (
 	input clk,
 	input rst,
@@ -74,7 +76,6 @@ module updi_programmer #(
 
 	// PHY signals
 	logic phy_rx_error;
-	logic uart_clk;
 	logic double_break_start, double_break_busy, double_break_done;
 
 	// program ROM instance
@@ -145,10 +146,10 @@ module updi_programmer #(
 
 	// UPDI PHY instance
 	updi_phy #(
-		.UART_FIFO_DEPTH(UART_FIFO_DEPTH)
+		.UART_FIFO_DEPTH(UART_FIFO_DEPTH),
+		.UART_CLK_DIV(UART_CLK_DIV)
 	) phy_inst (
 		.clk(clk),
-		.uart_clk(uart_clk),
 		.rst(rst),
 		.uart_tx_fifo_data(uart_tx_fifo_data_in),
 		.uart_tx_fifo_wr_en(uart_tx_fifo_wr_en),

@@ -14,7 +14,8 @@ module top (
 	updi_programmer #(
 		.ROM_FILE_NAME(`ROM_NAME),
 		.ROM_SIZE(ROM_BUFFER_SIZE),
-		.ROM_ADDR_BITS($clog2(ROM_BUFFER_SIZE))
+		.ROM_ADDR_BITS($clog2(ROM_BUFFER_SIZE)),
+		.UART_CLK_DIV(100)
 	) programmer_inst (
 		.clk(clk),
 		.rst(rst),

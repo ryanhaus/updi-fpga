@@ -3,10 +3,10 @@
 // Handles UART/UPDI transactions
 module updi_phy #(
 	parameter UART_FIFO_DEPTH = 16,
-	parameter DOUBLE_BREAK_PULSE_CLK = 100000
+	parameter DOUBLE_BREAK_PULSE_CLK = 100000,
+	parameter UART_CLK_DIV = 10
 ) (
 	input clk,
-	input uart_clk,
 	input rst,
 
 	// UART FIFO interface
@@ -38,10 +38,10 @@ module updi_phy #(
 		.DATA_BITS(8),
 		.PARITY_BIT("even"),
 		.STOP_BITS(2),
-		.FIFO_DEPTH(UART_FIFO_DEPTH)
+		.FIFO_DEPTH(UART_FIFO_DEPTH),
+		.UART_CLK_DIV(UART_CLK_DIV)
 	) uart_fifo_inst (
 		.clk(clk),
-		.uart_clk(uart_clk),
 		.rst(rst),
 		.tx_data(uart_tx_fifo_data),
 		.rx_data(uart_rx_fifo_data),
