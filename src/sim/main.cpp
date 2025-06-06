@@ -3,15 +3,16 @@
 #include "Vtop.h"
 #include "verilated_fst_c.h"
 
+#define MAX_TIME_PS 1000000
+
 VerilatedContext* ctx;
 VerilatedFstC* m_trace;
 Vtop* top;
+uint64_t time_ps = 0;
 
 // does a clock cycle
 void clk()
 {
-	static uint64_t time_ps = 0;
-
 	top->clk = 0;
 	top->eval();
 	m_trace->dump(time_ps += 10);
@@ -41,7 +42,7 @@ int main(int argc, char** argv)
 	top->rst = 0;
 	clk();
 
-	for (int i = 2; i < 500000; i++)
+	while (time_ps < MAX_TIME_PS)
 	{
 		clk();
 	}
