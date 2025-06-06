@@ -9,25 +9,34 @@ module clock_divider #(
 	output logic clk_out
 );
 
-	localparam COUNTER_BITS = $clog2(DIV);
-
-	logic [COUNTER_BITS-1 : 0] counter;
-
-	always_ff @(posedge clk_in) begin
-		if (rst) begin
-			counter <= 'b0;
-			clk_out <= 'b0;
+	generate
+		if (DIV == 1) begin
+			// always valid
+			assign clk_out = 'b1;
 		end
 		else begin
-			clk_out <= (counter == SHIFT[COUNTER_BITS-1 : 0]);
+			// valid every DIV clock cycles
+			localparam COUNTER_BITS = $clog2(DIV);
 
-			if (counter == DIV - 1) begin
-				counter <= 'b0;
-			end
-			else begin
-				counter <= counter + 'b1;
+			logic [COUNTER_BITS-1 : 0] counter;
+
+			always_ff @(posedge clk_in) begin
+				if (rst) begin
+					counter <= 'b0;
+					clk_out <= 'b0;
+				end
+				else begin
+					clk_out <= (counter == SHIFT[COUNTER_BITS-1 : 0]);
+
+					if (counter == DIV - 1) begin
+						counter <= 'b0;
+					end
+					else begin
+						counter <= counter + 'b1;
+					end
+				end
 			end
 		end
-	end
+	endgenerate
 
 endmodule
