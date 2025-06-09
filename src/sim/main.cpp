@@ -3,11 +3,15 @@
 #include "Vtop.h"
 #include "verilated_fst_c.h"
 
+#include "updi_phy.hpp"
+
 #define MAX_TIME_PS 1000000
+#define SERIAL_PORT "/dev/ttyUSB0"
 
 VerilatedContext* ctx;
 VerilatedFstC* m_trace;
 Vtop* top;
+updi_phy* phy;
 uint64_t time_ps = 0;
 
 // does a clock cycle
@@ -19,6 +23,7 @@ void clk()
 
 	top->clk = 1;
 	top->eval();
+	phy->tick(top);
 	m_trace->dump(time_ps += 10);
 }
 
@@ -34,6 +39,8 @@ int main(int argc, char** argv)
 	m_trace = new VerilatedFstC;
 	top->trace(m_trace, 99);
 	m_trace->open("trace/top.fst");
+
+	phy = new updi_phy(SERIAL_PORT);
 
 	// reset
 	top->rst = 1;

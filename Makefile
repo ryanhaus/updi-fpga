@@ -41,6 +41,7 @@ obj_dir/Vtop: generated
 		--no-unlimited-stack \
 		--trace-fst \
 		--top-module top \
+		-LDFLAGS "-lserial" \
 		src/rtl/*.sv \
 		src/sim/*.cpp
 
