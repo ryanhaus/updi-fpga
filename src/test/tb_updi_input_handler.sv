@@ -4,14 +4,14 @@ module tb_updi_input_handler();
 	parameter BITS_N = 6;
 
 	// updi_input_handler instance (posedge)
-	logic clk, rst, wait_ack, ack_received, ack_error, start, ready, in_fifo_empty, in_fifo_rd_en, out_fifo_full, out_fifo_wr_en;
+	logic clk, rst, wait_ack, ack_received, ack_error, start, done, ready, in_fifo_empty, in_fifo_rd_en, out_fifo_full, out_fifo_wr_en;
 	logic [7:0] in_fifo_data, out_fifo_data;
 	logic [BITS_N-1 : 0] n_bytes;
 
 	updi_input_handler #(.BITS_N(BITS_N)) dut (
 		clk, rst,
 		wait_ack, ack_received, ack_error,
-		n_bytes, start, ready,
+		n_bytes, start, ready, done,
 		in_fifo_data, in_fifo_empty, in_fifo_rd_en,
 		out_fifo_data, out_fifo_full, out_fifo_wr_en
 	);

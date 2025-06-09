@@ -29,6 +29,7 @@ module updi_interface #(
 	input [DATA_ADDR_BITS-1 : 0] rx_n_bytes,
 	input rx_start,
 	output rx_ready,
+	output rx_done,
 	output ack_error,
 
 	// output rx data FIFO interface
@@ -93,6 +94,7 @@ module updi_interface #(
 		.n_bytes(rx_n_bytes),
 		.start(rx_start),
 		.ready(rx_ready),
+		.done(rx_done),
 		.in_fifo_data(uart_rx_fifo_data),
 		.in_fifo_empty(uart_rx_fifo_empty),
 		.in_fifo_rd_en(uart_rx_fifo_rd_en),

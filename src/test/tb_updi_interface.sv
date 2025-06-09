@@ -6,7 +6,7 @@ module tb_updi_interface();
 	parameter FIFO_DEPTH = 64;
 
 	// updi_interface instance
-	logic clk, rst, sib, tx_start, tx_ready, rx_start, rx_ready, ack_error,
+	logic clk, rst, sib, tx_start, tx_ready, rx_start, rx_ready, rx_done, ack_error,
 		out_rx_fifo_wr_en, out_rx_fifo_full, uart_rx_fifo_rd_en, uart_rx_fifo_empty,
 		uart_tx_fifo_wr_en, uart_tx_fifo_full;
 	logic [1:0] size_a, size_b, ptr, size_c;
@@ -38,6 +38,7 @@ module tb_updi_interface();
 		.rx_n_bytes(rx_n_bytes),
 		.rx_start(rx_start),
 		.rx_ready(rx_ready),
+		.rx_done(rx_done),
 		.ack_error(ack_error),
 		.out_rx_fifo_data(out_rx_fifo_data),
 		.out_rx_fifo_wr_en(out_rx_fifo_wr_en),

@@ -4,7 +4,8 @@ typedef enum {
 	UPDI_IN_HDLR_READ_ACK,
 	UPDI_IN_HDLR_CHECK_ACK,
 	UPDI_IN_HDLR_FIFO_READ,
-	UPDI_IN_HDLR_FIFO_WRITE
+	UPDI_IN_HDLR_FIFO_WRITE,
+	UPDI_IN_HDLR_DONE
 } updi_input_handler_state;
 
 // Handles receiving input. In ACK mode, a single value of 0x40 is expected to
@@ -26,6 +27,7 @@ module updi_input_handler #(
 	input [BITS_N-1 : 0] n_bytes,
 	input start,
 	output logic ready,
+	output logic done, // high for 1 clock signal
 
 	// input FIFO interface (should be opposite clocked)
 	input [7:0] in_fifo_data,
@@ -78,13 +80,17 @@ module updi_input_handler #(
 				UPDI_IN_HDLR_FIFO_WRITE: begin
 					if (!out_fifo_full) begin
 						if (counter == 'b1) begin
-							state <= UPDI_IN_HDLR_IDLE;
+							state <= UPDI_IN_HDLR_DONE;
 						end
 						else begin
 							counter <= counter - 'b1;
 							state <= UPDI_IN_HDLR_FIFO_READ;
 						end
 					end
+				end
+
+				UPDI_IN_HDLR_DONE: begin
+					state <= UPDI_IN_HDLR_IDLE;
 				end
 			endcase
 		end
@@ -96,6 +102,7 @@ module updi_input_handler #(
 		out_fifo_wr_en = 'b0;
 		ack_received = 'b0;
 		ack_error = 'b0;
+		done = 'b0;
 
 		case (state)
 			UPDI_IN_HDLR_IDLE: begin
@@ -127,6 +134,11 @@ module updi_input_handler #(
 				if (!out_fifo_full) begin
 					out_fifo_wr_en = 'b1;
 				end
+			end
+
+			UPDI_IN_HDLR_DONE: begin
+				ready = 'b1;
+				done = 'b1;
 			end
 		endcase
 	end
