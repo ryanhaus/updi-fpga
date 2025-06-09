@@ -16,8 +16,8 @@ module rom #(
 	initial $readmemh(FILE_NAME, data);
 
 	// handle reading
-	always_ff @(posedge clk) begin
-		out <= data[addr];
+	always_comb begin
+		out = data[addr];
 	end
 
 endmodule
