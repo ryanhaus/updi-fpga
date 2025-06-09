@@ -17,7 +17,10 @@ class updi_phy
 		uint64_t tick(Vtop*);
 
 	private:
-		SerialPort ser;
+		SerialPort* ser;
+		std::string port;
 		std::queue<uint8_t> rx_fifo;
 		std::queue<uint8_t> tx_fifo;
+
+		void open_serial(BaudRate);
 };

@@ -1,9 +1,15 @@
 // Possible states of the UPDI programmer.
 typedef enum {
 	UPDI_PROG_IDLE,
-	UPDI_PROG_RESET_UPDI,
+
+	UPDI_PROG_RESET_UPDI_DB_START,
+	UPDI_PROG_RESET_UPDI_DB_WAIT,
+
+	UPDI_PROG_READ_UPDI_STATUS_WR_INSTR,
+	UPDI_PROG_READ_UPDI_STATUS_WAIT_DATA,
+	UPDI_PROG_READ_UPDI_STATUS_VERIFY,
+
 	UPDI_PROG_RESET_CHIP,
-	UPDI_PROG_READ_UPDI_STATUS,
 	UPDI_PROG_UNLOCK_CHIPERASE,
 	UPDI_PROG_UNLOCK_NVMPROG,
 	UPDI_PROG_READ_DEVICE_ID,
@@ -156,30 +162,35 @@ module updi_programmer #(
 					// wait for start signal
 					if (start) begin
 						counter <= 'b0;
-						state <= UPDI_PROG_RESET_UPDI;
+						state <= UPDI_PROG_RESET_UPDI_DB_START;
 					end
 				end
 				
-				UPDI_PROG_RESET_UPDI: begin
-					// wait until double break is done
-					if (counter == 'b0) begin
-						double_break_start <= 'b1;
-						counter <= 'b1;
-					end
-					else begin
-						double_break_start <= 'b0;
+				UPDI_PROG_RESET_UPDI_DB_START: begin
+					// start UPDI double break
+					state <= UPDI_PROG_RESET_UPDI_DB_WAIT;
+				end
 
-						if (double_break_done) begin
-							state <= UPDI_PROG_RESET_CHIP;
-						end
+				UPDI_PROG_RESET_UPDI_DB_WAIT: begin
+					// wait for UPDI double break to finish
+					if (double_break_done && interface_tx_ready) begin
+						state <= UPDI_PROG_READ_UPDI_STATUS_WR_INSTR;
 					end
+				end
+				
+				UPDI_PROG_READ_UPDI_STATUS_WR_INSTR: begin
+					state <= UPDI_PROG_READ_UPDI_STATUS_WAIT_DATA;
+				end
+
+				UPDI_PROG_READ_UPDI_STATUS_WAIT_DATA: begin
+
+				end
+
+				UPDI_PROG_READ_UPDI_STATUS_VERIFY: begin
+
 				end
 				
 				UPDI_PROG_RESET_CHIP: begin
-				
-				end
-				
-				UPDI_PROG_READ_UPDI_STATUS: begin
 				
 				end
 				
@@ -208,20 +219,45 @@ module updi_programmer #(
 
 	always_comb begin
 		busy = 'b1;
+
+		double_break_start = 'b0;
+
+		instruction = UPDI_LDS;
+		instr_sib = 'b0;
+		instr_size_a = 'b0;
+		instr_size_b = 'b0;
+		instr_ptr = 'b0;
+		instr_size_c = 'b0;
+		instr_cs_addr = 'b0;
+		instr_data = '{default: 'b0};
+		instr_data_len = 'b0;
+		instr_wait_ack_after = 'b0;
+
+		interface_tx_start = 'b0;
+		out_rx_fifo_rd_en = 'b0;
 		
 		case (state)
 			UPDI_PROG_IDLE: begin
 				busy = 'b0;
 			end
-			
-			UPDI_PROG_RESET_UPDI: begin
+
+			UPDI_PROG_RESET_UPDI_DB_START: begin
+				double_break_start = 'b1;
 			end
-			
+
+			UPDI_PROG_RESET_UPDI_DB_WAIT: begin
+				// do nothing
+			end
+
+			UPDI_PROG_READ_UPDI_STATUS_WR_INSTR, UPDI_PROG_READ_UPDI_STATUS_WAIT_DATA: begin
+				// read STATUSA register (0x00)
+				instruction = UPDI_LDCS;
+				instr_data[0] = 'h00;
+				instr_data_len = 'd1;
+				interface_tx_start = (state == UPDI_PROG_READ_UPDI_STATUS_WR_INSTR);
+			end
+
 			UPDI_PROG_RESET_CHIP: begin
-			
-			end
-			
-			UPDI_PROG_READ_UPDI_STATUS: begin
 			
 			end
 			
