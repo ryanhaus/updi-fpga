@@ -85,7 +85,7 @@ module uart_fifo #(
 	// RX controller logic
 	logic prev_rx_data_valid; // used for edge detection on rx_data_valid
 
-	always_ff @(negedge clk) begin
+	always_ff @(posedge clk) begin
 		if (rst) begin
 			prev_rx_data_valid <= 'b0;
 			rx_fifo_wr_en <= 'b0;
@@ -108,7 +108,7 @@ module uart_fifo #(
 	uart_fifo_tx_state tx_state; // TX state machine state
 	logic queue_transmit_start; // set transmit_start on the next clock cycle
 
-	always_ff @(negedge clk) begin
+	always_ff @(posedge clk) begin
 
 		if (rst) begin
 			queue_transmit_start <= 'b0;

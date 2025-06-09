@@ -19,11 +19,11 @@ module tb_program_decoder();
 		block_length, block_address, block_type, block_data
 	);
 
-	// ROM on negedge
+	// ROM
 	rom #(
 		.FILE_NAME(PROGRAM_FILE),
 		.SIZE(PROGRAM_SIZE)
-	) rom_inst (~clk, prog_addr, prog_data);
+	) rom_inst (clk, prog_addr, prog_data);
 
 	// test
 	logic [7:0] expected_data [dut.PROGRAM_SIZE];

@@ -13,9 +13,9 @@ module tb_updi_instruction_queue_handler();
 	logic [7:0] fifo_out;
 	logic fifo_rd_en, fifo_empty;
 
-	// fifo on negedge
+	// fifo
 	fifo #(.DEPTH(4)) fifo_inst (
-		~clk, rst,
+		clk, rst,
 		fifo_data, fifo_out,
 		fifo_rd_en, fifo_wr_en,
 		fifo_empty, fifo_full
