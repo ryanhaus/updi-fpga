@@ -26,13 +26,11 @@ void clk()
 
 	// high clock pulse
 	top->clk = 1;
+	phy->tick_fifo(top);
 	top->eval();
-
-	// handle PHY tick, if necessary
-	if (--phy_ctr <= 0)
-	{
-		phy_ctr = (int64_t)phy->tick(top);
-	}
+	phy->tick_fifo_flags(top);
+	top->eval();
+	phy->tick_uart(top);
 
 	m_trace->dump(time_ps += 10);
 }

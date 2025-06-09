@@ -14,13 +14,19 @@ class updi_phy
 		updi_phy(std::string);
 		~updi_phy();
 
-		uint64_t tick(Vtop*);
+		void tick_fifo(Vtop*);
+		void tick_fifo_flags(Vtop*);
+		void tick_uart(Vtop*);
 
 	private:
 		SerialPort* ser;
 		std::string port;
+
 		std::queue<uint8_t> rx_fifo;
 		std::queue<uint8_t> tx_fifo;
+		
+		uint64_t ticks;
+		uint64_t last_tx_mod_tick;
 
 		void open_serial(BaudRate);
 };
