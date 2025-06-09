@@ -6,6 +6,7 @@ typedef enum {
 	UPDI_PROG_RESET_UPDI_DB_WAIT,
 
 	UPDI_PROG_READ_UPDI_STATUS_WR_INSTR,
+	UPDI_PROG_READ_UPDI_STATUS_READ_DATA,
 	UPDI_PROG_READ_UPDI_STATUS_WAIT_DATA,
 	UPDI_PROG_READ_UPDI_STATUS_VERIFY,
 
@@ -182,11 +183,20 @@ module updi_programmer #(
 				end
 				
 				UPDI_PROG_READ_UPDI_STATUS_WR_INSTR: begin
-					state <= UPDI_PROG_READ_UPDI_STATUS_WAIT_DATA;
+					// write instruction for 1 clock cycle, then wait for data
+					state <= UPDI_PROG_READ_UPDI_STATUS_READ_DATA;
+				end
+
+				UPDI_PROG_READ_UPDI_STATUS_READ_DATA: begin
+					if (interface_rx_ready) begin
+						state <= UPDI_PROG_READ_UPDI_STATUS_WAIT_DATA;
+					end
 				end
 
 				UPDI_PROG_READ_UPDI_STATUS_WAIT_DATA: begin
-
+					if (interface_rx_done) begin
+						state <= UPDI_PROG_READ_UPDI_STATUS_VERIFY;
+					end
 				end
 
 				UPDI_PROG_READ_UPDI_STATUS_VERIFY: begin
@@ -233,10 +243,11 @@ module updi_programmer #(
 		instr_ptr = 'b0;
 		instr_size_c = 'b0;
 		instr_cs_addr = 'b0;
-		instr_data = '{default: 'b0};
-		instr_data_len = 'b0;
-		instr_wait_ack_after = 'b0;
+		// instr_data = '{default: 'b0};
+		// instr_data_len = 'b0;
+		// instr_wait_ack_after = 'b0;
 
+		interface_rx_start = 'b0;
 		interface_tx_start = 'b0;
 		out_rx_fifo_rd_en = 'b0;
 		
@@ -253,16 +264,38 @@ module updi_programmer #(
 				// do nothing
 			end
 
-			UPDI_PROG_READ_UPDI_STATUS_WR_INSTR, UPDI_PROG_READ_UPDI_STATUS_WAIT_DATA: begin
-				// read STATUSA register (0x00)
+			UPDI_PROG_READ_UPDI_STATUS_WR_INSTR: begin
+				// send instruction to read STATUSA register (0x00)
+				instr_converter_en = 'b1;
 				instruction = UPDI_LDCS;
 				instr_data[0] = 'h00;
 				instr_data_len = 'd1;
-				interface_tx_start = (state == UPDI_PROG_READ_UPDI_STATUS_WR_INSTR);
+				interface_tx_start = 'b1;
+			end
+
+			UPDI_PROG_READ_UPDI_STATUS_READ_DATA: begin
+				// init data read of 1 byte
+				interface_rx_n_bytes = 'd1;
+				interface_rx_start = 'b1;
+			end
+
+			UPDI_PROG_READ_UPDI_STATUS_WAIT_DATA: begin
+				// if there is data in the FIFO, try to read it next clk cycle
+				if (!out_rx_fifo_empty) begin
+					out_rx_fifo_rd_en = 'b1;
+				end
+			end
+
+			UPDI_PROG_READ_UPDI_STATUS_VERIFY: begin
+				// make sure status != 0x00
+				if (out_rx_fifo_data_out == 'h00) begin
+					// TODO: make synthesizable
+					$error();
+				end
 			end
 
 			UPDI_PROG_RESET_CHIP: begin
-			
+				
 			end
 			
 			UPDI_PROG_UNLOCK_CHIPERASE: begin
