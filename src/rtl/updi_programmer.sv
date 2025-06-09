@@ -61,6 +61,7 @@ module updi_programmer #(
 	logic [7:0] program_block_data [DATA_BLOCK_MAX_SIZE];
 
 	// interface signals
+	logic instr_converter_en;
 	updi_instruction instruction;
 	logic instr_sib;
 	logic [1:0] instr_size_a, instr_size_b, instr_ptr, instr_size_c;
@@ -106,6 +107,7 @@ module updi_programmer #(
 	) interface_inst (
 		.clk(clk),
 		.rst(rst),
+		.instr_converter_en(instr_converter_en),
 		.instruction(instruction),
 		.size_a(instr_size_a),
 		.size_b(instr_size_b),
@@ -223,6 +225,7 @@ module updi_programmer #(
 
 		double_break_start = 'b0;
 
+		instr_converter_en = 'b0;
 		instruction = UPDI_LDS;
 		instr_sib = 'b0;
 		instr_size_a = 'b0;

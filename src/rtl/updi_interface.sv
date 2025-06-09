@@ -8,6 +8,7 @@ module updi_interface #(
 	input rst,
 
 	// instruction inputs
+	input instr_converter_en,
 	updi_instruction instruction,
 	input [1:0] size_a,
 	input [1:0] size_b,
@@ -53,7 +54,7 @@ module updi_interface #(
 	// instruction converter instance
 	updi_instruction_converter instr_conv (
 		.rst(rst),
-		.enable('b1),
+		.enable(instr_converter_en),
 		.instruction(instruction),
 		.size_a(size_a),
 		.size_b(size_b),
