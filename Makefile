@@ -42,7 +42,7 @@ obj_dir/Vtop: generated
 		--trace-fst \
 		--top-module top \
 		src/rtl/*.sv \
-		src/sim/main.cpp
+		src/sim/*.cpp
 
 # build testbench simulation programs w/ matching
 obj_dir/Vtb_%: generated src/test/tb_%.sv src/rtl/%.sv
