@@ -12,7 +12,9 @@ class updi_phy
 {
 	public:
 		updi_phy(std::string);
-		void tick(Vtop*);
+		~updi_phy();
+
+		uint64_t tick(Vtop*);
 
 	private:
 		SerialPort ser;

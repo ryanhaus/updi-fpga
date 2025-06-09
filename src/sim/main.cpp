@@ -1,4 +1,4 @@
-#include <stdint.h>
+#include <cstdint>
 #include "verilated.h"
 #include "Vtop.h"
 #include "verilated_fst_c.h"
@@ -17,13 +17,23 @@ uint64_t time_ps = 0;
 // does a clock cycle
 void clk()
 {
+	static int64_t phy_ctr = 0; // holds # of clock cycles until next PHY tick
+
+	// low clock pulse
 	top->clk = 0;
 	top->eval();
 	m_trace->dump(time_ps += 10);
 
+	// high clock pulse
 	top->clk = 1;
 	top->eval();
-	phy->tick(top);
+
+	// handle PHY tick, if necessary
+	if (--phy_ctr <= 0)
+	{
+		phy_ctr = (int64_t)phy->tick(top);
+	}
+
 	m_trace->dump(time_ps += 10);
 }
 
