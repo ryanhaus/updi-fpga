@@ -24,6 +24,21 @@ typedef enum {
 	UPDI_PROG_UNLOCK_CHIPERASE_WAIT_FINISH_READ_VERIFY,
 	UPDI_PROG_UNLOCK_CHIPERASE_WAIT_FINISH_WAIT_DELAY,
 
+	UPDI_PROG_UNLOCK_NVMPROG_SEND_KEY,
+	UPDI_PROG_UNLOCK_NVMPROG_SEND_KEY_WAIT_DONE,
+	UPDI_PROG_UNLOCK_NVMPROG_READ_STATUS,
+	UPDI_PROG_UNLOCK_NVMPROG_READ_STATUS_WAIT_DONE,
+	UPDI_PROG_UNLOCK_NVMPROG_VERIFY_STATUS,
+	UPDI_PROG_UNLOCK_NVMPROG_RESET_DEVICE_START,
+	UPDI_PROG_UNLOCK_NVMPROG_RESET_DEVICE_START_WAIT_DONE,
+	UPDI_PROG_UNLOCK_NVMPROG_RESET_DEVICE_WAIT_DELAY,
+	UPDI_PROG_UNLOCK_NVMPROG_RESET_DEVICE_CLEAR,
+	UPDI_PROG_UNLOCK_NVMPROG_RESET_DEVICE_CLEAR_WAIT_DONE,
+	UPDI_PROG_UNLOCK_NVMPROG_WAIT_FINISH_READ,
+	UPDI_PROG_UNLOCK_NVMPROG_WAIT_FINISH_READ_WAIT_DONE,
+	UPDI_PROG_UNLOCK_NVMPROG_WAIT_FINISH_READ_VERIFY,
+	UPDI_PROG_UNLOCK_NVMPROG_WAIT_FINISH_WAIT_DELAY,
+
 	UPDI_PROG_READ_DEVICE_ID,
 	UPDI_PROG_PROGRAM_ROM,
 	UPDI_PROG_VERIFY_ROM
@@ -290,8 +305,76 @@ module updi_programmer #(
 					end
 				end
 
-				UPDI_PROG_UNLOCK_NVMPROG: begin
+				UPDI_PROG_UNLOCK_NVMPROG_SEND_KEY: begin
+					state <= UPDI_PROG_UNLOCK_NVMPROG_SEND_KEY_WAIT_DONE;
+				end
+
+				UPDI_PROG_UNLOCK_NVMPROG_SEND_KEY_WAIT_DONE: begin
+					if (interface_tx_ready) begin
+						state <= UPDI_PROG_UNLOCK_NVMPROG_READ_STATUS;
+					end
+				end
+
+				UPDI_PROG_UNLOCK_NVMPROG_READ_STATUS: begin
+					state <= UPDI_PROG_UNLOCK_NVMPROG_READ_STATUS_WAIT_DONE;
+				end
+
+				UPDI_PROG_UNLOCK_NVMPROG_READ_STATUS_WAIT_DONE: begin
+					if (interface_rx_done) begin
+						state <= UPDI_PROG_UNLOCK_NVMPROG_VERIFY_STATUS;
+					end
+				end
+
+				UPDI_PROG_UNLOCK_NVMPROG_VERIFY_STATUS: begin
+					state <= UPDI_PROG_UNLOCK_NVMPROG_RESET_DEVICE_START;
+				end
+
+				UPDI_PROG_UNLOCK_NVMPROG_RESET_DEVICE_START: begin
+					state <= UPDI_PROG_UNLOCK_NVMPROG_RESET_DEVICE_START_WAIT_DONE;
+				end
+
+				UPDI_PROG_UNLOCK_NVMPROG_RESET_DEVICE_START_WAIT_DONE: begin
+					if (interface_tx_ready) begin
+						state <= UPDI_PROG_UNLOCK_NVMPROG_RESET_DEVICE_WAIT_DELAY;
+					end
+				end
+
+				UPDI_PROG_UNLOCK_NVMPROG_RESET_DEVICE_WAIT_DELAY: begin
+					if (delay_done) begin
+						state <= UPDI_PROG_UNLOCK_NVMPROG_RESET_DEVICE_CLEAR;
+					end
+				end
 				
+				UPDI_PROG_UNLOCK_NVMPROG_RESET_DEVICE_CLEAR: begin
+					state <= UPDI_PROG_UNLOCK_NVMPROG_RESET_DEVICE_CLEAR_WAIT_DONE;
+				end
+
+				UPDI_PROG_UNLOCK_NVMPROG_RESET_DEVICE_CLEAR_WAIT_DONE: begin
+					if (interface_tx_ready) begin
+						state <= UPDI_PROG_UNLOCK_NVMPROG_WAIT_FINISH_READ;
+					end
+				end
+				
+				UPDI_PROG_UNLOCK_NVMPROG_WAIT_FINISH_READ: begin
+					state <= UPDI_PROG_UNLOCK_NVMPROG_WAIT_FINISH_READ_WAIT_DONE;
+				end
+				
+				UPDI_PROG_UNLOCK_NVMPROG_WAIT_FINISH_READ_WAIT_DONE: begin
+					if (interface_rx_done) begin
+						state <= UPDI_PROG_UNLOCK_NVMPROG_WAIT_FINISH_READ_VERIFY;
+					end
+				end
+				
+				UPDI_PROG_UNLOCK_NVMPROG_WAIT_FINISH_READ_VERIFY: begin
+					state <= valid
+						? UPDI_PROG_READ_DEVICE_ID
+						: UPDI_PROG_UNLOCK_NVMPROG_WAIT_FINISH_WAIT_DELAY;
+				end
+				
+				UPDI_PROG_UNLOCK_NVMPROG_WAIT_FINISH_WAIT_DELAY: begin
+					if (delay_done) begin
+						state <= UPDI_PROG_UNLOCK_NVMPROG_WAIT_FINISH_READ;
+					end
 				end
 				
 				UPDI_PROG_READ_DEVICE_ID: begin
@@ -461,6 +544,104 @@ module updi_programmer #(
 			UPDI_PROG_UNLOCK_CHIPERASE_WAIT_FINISH_READ_VERIFY: begin
 				// check if bit 1 is 0
 				if (out_rx_fifo_data_in[0] == 'b0) begin
+					valid = 'b1;
+				end
+
+				// if it's not, start the delay
+				if (!valid) begin
+					delay_start = 'b1;
+				end
+			end
+
+			UPDI_PROG_UNLOCK_NVMPROG_SEND_KEY: begin
+				instr_converter_en = 'b1;
+				instruction = UPDI_KEY;
+
+				load_key(`KEY_NVMPROG, instr_data[0:7]);
+				instr_data_len = 'd8;
+
+				interface_tx_start = 'b1;
+			end
+
+			UPDI_PROG_UNLOCK_NVMPROG_READ_STATUS: begin
+				// send instruction to read ASI_KEY_STATUS register (0x07)
+				instr_converter_en = 'b1;
+				instruction = UPDI_LDCS;
+				instr_cs_addr = 'h7;
+
+				interface_tx_start = 'b1;
+
+				// init data read of 1 byte
+				interface_rx_n_bytes = 'd1;
+				interface_rx_start = 'b1;
+			end
+
+			UPDI_PROG_UNLOCK_NVMPROG_READ_STATUS_WAIT_DONE: begin
+				// if there is data in the FIFO, try to read it next clk cycle
+				if (!out_rx_fifo_empty) begin
+					out_rx_fifo_rd_en = 'b1;
+				end
+			end
+
+			UPDI_PROG_UNLOCK_NVMPROG_VERIFY_STATUS: begin
+				// make sure bit 4 is 1
+				if (out_rx_fifo_data_out[4] == 'b1) begin
+					valid = 'b1;
+				end
+
+				if (!valid) $error();
+			end
+
+			UPDI_PROG_UNLOCK_NVMPROG_RESET_DEVICE_START: begin
+				// store the system reset signature (0x59) into ASI_RESET_REQ (0x08)
+				instr_converter_en = 'b1;
+				instruction = UPDI_STCS;
+				instr_cs_addr = 'h8;
+
+				instr_data[0] = 'h59;
+				instr_data_len = 'd1;
+
+				interface_tx_start = 'b1;
+
+				// also, start the delay
+				delay_start = 'b1;
+			end
+
+			UPDI_PROG_UNLOCK_NVMPROG_RESET_DEVICE_CLEAR: begin
+				// clear ASI_RESET_REQ (0x08)
+				instr_converter_en = 'b1;
+				instruction = UPDI_STCS;
+				instr_cs_addr = 'h8;
+
+				instr_data[0] = 'h00;
+				instr_data_len = 'd1;
+
+				interface_tx_start = 'b1;
+			end
+
+			UPDI_PROG_UNLOCK_NVMPROG_WAIT_FINISH_READ: begin
+				// read ASI_SYS_STATUS (0x0B)
+				instr_converter_en = 'b1;
+				instruction = UPDI_LDCS;
+				instr_cs_addr = 'hB;
+
+				interface_tx_start = 'b1;
+				
+				// init data read of 1 byte
+				interface_rx_n_bytes = 'd1;
+				interface_rx_start = 'b1;
+			end
+
+			UPDI_PROG_UNLOCK_NVMPROG_WAIT_FINISH_READ_WAIT_DONE: begin
+				// if there is data in the FIFO, try to read it next clk cycle
+				if (!out_rx_fifo_empty) begin
+					out_rx_fifo_rd_en = 'b1;
+				end
+			end
+
+			UPDI_PROG_UNLOCK_NVMPROG_WAIT_FINISH_READ_VERIFY: begin
+				// check if bit 3 is 1
+				if (out_rx_fifo_data_in[3] == 'b1) begin
 					valid = 'b1;
 				end
 
