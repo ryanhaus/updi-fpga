@@ -37,7 +37,9 @@ module updi_programmer #(
 	
 	parameter DATA_BLOCK_MAX_SIZE = 2 ** (DATA_ADDR_BITS + 1),
 
-	parameter RX_OUT_FIFO_DEPTH = 16
+	parameter RX_OUT_FIFO_DEPTH = 16,
+
+	parameter DELAY_N_CLKS = 100
 ) (
 	input clk,
 	input rst,
@@ -88,6 +90,9 @@ module updi_programmer #(
 	// RX out FIFO signals
 	logic [7:0] out_rx_fifo_data_out;
 	logic out_rx_fifo_rd_en, out_rx_fifo_empty;
+
+	// delay signals
+	logic delay_start, delay_done;
 
 	// program ROM instance
 	program_rom #(
@@ -155,6 +160,14 @@ module updi_programmer #(
 		.wr_en(out_rx_fifo_wr_en),
 		.empty(out_rx_fifo_empty),
 		.full(out_rx_fifo_full)
+	);
+
+	// delay instance
+	delay #(.N_CLKS(DELAY_N_CLKS)) delay_inst (
+		.clk(clk),
+		.rst(rst),
+		.start(delay_start),
+		.done(delay_done)
 	);
 
 	// State machine
