@@ -110,7 +110,9 @@ module updi_input_handler #(
 			end
 
 			UPDI_IN_HDLR_READ_ACK: begin
-				in_fifo_rd_en = 'b1;
+				if (!in_fifo_empty) begin
+					in_fifo_rd_en = 'b1;
+				end
 			end
 
 			UPDI_IN_HDLR_CHECK_ACK: begin
