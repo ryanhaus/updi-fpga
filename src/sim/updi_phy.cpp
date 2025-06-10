@@ -66,7 +66,7 @@ void updi_phy::tick_fifo(Vtop* top)
 	}
 
 	// handle RX FIFO interface
-	if (top->uart_rx_fifo_rd_en)
+	if (top->uart_rx_fifo_rd_en && this->rx_fifo.size() > 0)
 	{
 		uint8_t rx_val = this->rx_fifo.front();
 		this->rx_fifo.pop();
