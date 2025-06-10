@@ -300,9 +300,7 @@ module updi_programmer #(
 				// send instruction to read STATUSA register (0x00)
 				instr_converter_en = 'b1;
 				instruction = UPDI_LDCS;
-
-				instr_data[0] = 'h00;
-				instr_data_len = 'd1;
+				instr_cs_addr = 'h0;
 
 				interface_tx_start = 'b1;
 				
@@ -340,9 +338,7 @@ module updi_programmer #(
 				// send instruction to read ASI_SYS_STATUS register (0x0B)
 				instr_converter_en = 'b1;
 				instruction = UPDI_LDCS;
-
-				instr_data[0] = 'h0B; // ASI_SYS_STATUS
-				instr_data_len = 'd1;
+				instr_cs_addr = 'hB; // ASI_SYS_STATUS
 
 				interface_tx_start = 'b1;
 
