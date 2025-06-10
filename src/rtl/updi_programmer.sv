@@ -5,14 +5,20 @@ typedef enum {
 	UPDI_PROG_RESET_UPDI_DB_START,
 	UPDI_PROG_RESET_UPDI_DB_WAIT,
 
-	UPDI_PROG_READ_UPDI_STATUS_WR_INSTR,
-	UPDI_PROG_READ_UPDI_STATUS_READ_DATA,
-	UPDI_PROG_READ_UPDI_STATUS_WAIT_DATA,
+	UPDI_PROG_READ_UPDI_STATUS_READ,
+	UPDI_PROG_READ_UPDI_STATUS_WAIT_DONE,
 	UPDI_PROG_READ_UPDI_STATUS_VERIFY,
 
-	UPDI_PROG_RESET_CHIP,
-	UPDI_PROG_UNLOCK_CHIPERASE,
+	UPDI_PROG_UNLOCK_CHIPERASE_SEND_KEY,
+	UPDI_PROG_UNLOCK_CHIPERASE_SEND_KEY_WAIT_DONE,
+	UPDI_PROG_UNLOCK_CHIPERASE_READ_STATUS,
+	UPDI_PROG_UNLOCK_CHIPERASE_READ_STATUS_WAIT_DONE,
+	UPDI_PROG_UNLOCK_CHIPERASE_VERIFY_STATUS,
+	UPDI_PROG_UNLOCK_CHIPERASE_RESET_DEVICE,
+	UPDI_PROG_UNLOCK_CHIPERASE_WAIT_FINISH,
+
 	UPDI_PROG_UNLOCK_NVMPROG,
+
 	UPDI_PROG_READ_DEVICE_ID,
 	UPDI_PROG_PROGRAM_ROM,
 	UPDI_PROG_VERIFY_ROM
@@ -178,37 +184,54 @@ module updi_programmer #(
 				UPDI_PROG_RESET_UPDI_DB_WAIT: begin
 					// wait for UPDI double break to finish
 					if (double_break_done && interface_tx_ready) begin
-						state <= UPDI_PROG_READ_UPDI_STATUS_WR_INSTR;
-					end
-				end
-				
-				UPDI_PROG_READ_UPDI_STATUS_WR_INSTR: begin
-					// write instruction for 1 clock cycle, then wait for data
-					state <= UPDI_PROG_READ_UPDI_STATUS_READ_DATA;
-				end
-
-				UPDI_PROG_READ_UPDI_STATUS_READ_DATA: begin
-					if (interface_rx_ready) begin
-						state <= UPDI_PROG_READ_UPDI_STATUS_WAIT_DATA;
+						state <= UPDI_PROG_READ_UPDI_STATUS_READ;
 					end
 				end
 
-				UPDI_PROG_READ_UPDI_STATUS_WAIT_DATA: begin
+				UPDI_PROG_READ_UPDI_STATUS_READ: begin
+					state <= UPDI_PROG_READ_UPDI_STATUS_WAIT_DONE;
+				end
+
+				UPDI_PROG_READ_UPDI_STATUS_WAIT_DONE: begin
 					if (interface_rx_done) begin
 						state <= UPDI_PROG_READ_UPDI_STATUS_VERIFY;
 					end
 				end
 
 				UPDI_PROG_READ_UPDI_STATUS_VERIFY: begin
+					state <= UPDI_PROG_UNLOCK_CHIPERASE_SEND_KEY;
+				end
 
+				UPDI_PROG_UNLOCK_CHIPERASE_SEND_KEY: begin
+					state <= UPDI_PROG_UNLOCK_CHIPERASE_SEND_KEY_WAIT_DONE;
 				end
 				
-				UPDI_PROG_RESET_CHIP: begin
-				
+				UPDI_PROG_UNLOCK_CHIPERASE_SEND_KEY_WAIT_DONE: begin
+					if (interface_tx_ready) begin
+						state <= UPDI_PROG_UNLOCK_CHIPERASE_READ_STATUS;
+					end
 				end
-				
-				UPDI_PROG_UNLOCK_CHIPERASE: begin
-				
+
+				UPDI_PROG_UNLOCK_CHIPERASE_READ_STATUS: begin
+					state <= UPDI_PROG_UNLOCK_CHIPERASE_READ_STATUS_WAIT_DONE;
+				end
+
+				UPDI_PROG_UNLOCK_CHIPERASE_READ_STATUS_WAIT_DONE: begin
+					if (interface_tx_ready) begin
+						state <= UPDI_PROG_UNLOCK_CHIPERASE_VERIFY_STATUS;
+					end
+				end
+
+				UPDI_PROG_UNLOCK_CHIPERASE_VERIFY_STATUS: begin
+					state <= UPDI_PROG_UNLOCK_CHIPERASE_RESET_DEVICE;
+				end
+
+				UPDI_PROG_UNLOCK_CHIPERASE_RESET_DEVICE: begin
+					
+				end
+
+				UPDI_PROG_UNLOCK_CHIPERASE_WAIT_FINISH: begin
+					
 				end
 				
 				UPDI_PROG_UNLOCK_NVMPROG: begin
@@ -260,26 +283,22 @@ module updi_programmer #(
 				double_break_start = 'b1;
 			end
 
-			UPDI_PROG_RESET_UPDI_DB_WAIT: begin
-				// do nothing
-			end
-
-			UPDI_PROG_READ_UPDI_STATUS_WR_INSTR: begin
+			UPDI_PROG_READ_UPDI_STATUS_READ: begin
 				// send instruction to read STATUSA register (0x00)
 				instr_converter_en = 'b1;
 				instruction = UPDI_LDCS;
+
 				instr_data[0] = 'h00;
 				instr_data_len = 'd1;
-				interface_tx_start = 'b1;
-			end
 
-			UPDI_PROG_READ_UPDI_STATUS_READ_DATA: begin
+				interface_tx_start = 'b1;
+				
 				// init data read of 1 byte
 				interface_rx_n_bytes = 'd1;
 				interface_rx_start = 'b1;
 			end
 
-			UPDI_PROG_READ_UPDI_STATUS_WAIT_DATA: begin
+			UPDI_PROG_READ_UPDI_STATUS_WAIT_DONE: begin
 				// if there is data in the FIFO, try to read it next clk cycle
 				if (!out_rx_fifo_empty) begin
 					out_rx_fifo_rd_en = 'b1;
@@ -294,12 +313,52 @@ module updi_programmer #(
 				end
 			end
 
-			UPDI_PROG_RESET_CHIP: begin
+			UPDI_PROG_UNLOCK_CHIPERASE_SEND_KEY: begin
+				instr_converter_en = 'b1;
+				instruction = UPDI_KEY;
+
+				load_key(`KEY_CHIPERASE, instr_data[0:7]);
+				instr_data_len = 'd8;
+
+				interface_tx_start = 'b1;
+			end
+
+			UPDI_PROG_UNLOCK_CHIPERASE_READ_STATUS: begin
+				// send instruction to read ASI_SYS_STATUS register (0x0B)
+				instr_converter_en = 'b1;
+				instruction = UPDI_LDCS;
+
+				instr_data[0] = 'h0B; // ASI_SYS_STATUS
+				instr_data_len = 'd1;
+
+				interface_tx_start = 'b1;
+
+				// init data read of 1 byte
+				interface_rx_n_bytes = 'd1;
+				interface_rx_start = 'b1;
+			end
+
+			UPDI_PROG_UNLOCK_CHIPERASE_READ_STATUS_WAIT_DONE: begin
+				// if there is data in the FIFO, try to read it next clk cycle
+				if (!out_rx_fifo_empty) begin
+					out_rx_fifo_rd_en = 'b1;
+				end
+			end
+
+			UPDI_PROG_UNLOCK_CHIPERASE_VERIFY_STATUS: begin
+				// make sure status bit 3 == 0
+				if (out_rx_fifo_data_out[3] != 'b0) begin
+					// TODO: make synthesizable
+					$error();
+				end
+			end
+
+			UPDI_PROG_UNLOCK_CHIPERASE_RESET_DEVICE: begin
 				
 			end
-			
-			UPDI_PROG_UNLOCK_CHIPERASE: begin
-			
+
+			UPDI_PROG_UNLOCK_CHIPERASE_WAIT_FINISH: begin
+				
 			end
 			
 			UPDI_PROG_UNLOCK_NVMPROG: begin
