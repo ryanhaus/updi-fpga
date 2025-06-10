@@ -175,19 +175,16 @@ module updi_programmer #(
 
 	// State machine
 	updi_programmer_state state;
-	logic [7:0] counter;
 
 	always_ff @(posedge clk) begin
 		if (rst) begin
 			state <= UPDI_PROG_IDLE;
-			counter <= 'b0;
 		end
 		else begin
 			case (state)
 				UPDI_PROG_IDLE: begin
 					// wait for start signal
 					if (start) begin
-						counter <= 'b0;
 						state <= UPDI_PROG_RESET_UPDI_DB_START;
 					end
 				end
