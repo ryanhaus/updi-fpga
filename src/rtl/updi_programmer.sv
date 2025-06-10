@@ -39,7 +39,16 @@ typedef enum {
 	UPDI_PROG_UNLOCK_NVMPROG_WAIT_FINISH_READ_VERIFY,
 	UPDI_PROG_UNLOCK_NVMPROG_WAIT_FINISH_WAIT_DELAY,
 
-	UPDI_PROG_READ_DEVICE_ID,
+	UPDI_PROG_READ_DEVICE_ID_SET_RD_PTR,
+	UPDI_PROG_READ_DEVICE_ID_SET_RD_PTR_WAIT_DONE,
+	UPDI_PROG_READ_DEVICE_ID_SET_REPEAT,
+	UPDI_PROG_READ_DEVICE_ID_SET_REPEAT_WAIT_DONE,
+	UPDI_PROG_READ_DEVICE_ID_READ,
+	UPDI_PROG_READ_DEVICE_ID_READ_WAIT_DONE,
+	UPDI_PROG_READ_DEVICE_ID_GET_ID_BYTE0,
+	UPDI_PROG_READ_DEVICE_ID_GET_ID_BYTE1,
+	UPDI_PROG_READ_DEVICE_ID_GET_ID_BYTE2,
+
 	UPDI_PROG_PROGRAM_ROM,
 	UPDI_PROG_VERIFY_ROM
 } updi_programmer_state;
@@ -192,6 +201,7 @@ module updi_programmer #(
 
 	// State machine
 	updi_programmer_state state;
+	logic [7:0] device_id [3];
 	logic valid;
 
 	always_ff @(posedge clk) begin
@@ -367,7 +377,7 @@ module updi_programmer #(
 				
 				UPDI_PROG_UNLOCK_NVMPROG_WAIT_FINISH_READ_VERIFY: begin
 					state <= valid
-						? UPDI_PROG_READ_DEVICE_ID
+						? UPDI_PROG_READ_DEVICE_ID_SET_RD_PTR
 						: UPDI_PROG_UNLOCK_NVMPROG_WAIT_FINISH_WAIT_DELAY;
 				end
 				
@@ -377,12 +387,50 @@ module updi_programmer #(
 					end
 				end
 				
-				UPDI_PROG_READ_DEVICE_ID: begin
+				UPDI_PROG_READ_DEVICE_ID_SET_RD_PTR: begin
+					state <= UPDI_PROG_READ_DEVICE_ID_SET_RD_PTR_WAIT_DONE;
+				end
+
+				UPDI_PROG_READ_DEVICE_ID_SET_RD_PTR_WAIT_DONE: begin
+					if (interface_tx_ready) begin
+						state <= UPDI_PROG_READ_DEVICE_ID_SET_REPEAT;
+					end
+				end
 				
+				UPDI_PROG_READ_DEVICE_ID_SET_REPEAT: begin
+					state <= UPDI_PROG_READ_DEVICE_ID_SET_REPEAT_WAIT_DONE;
+				end
+
+				UPDI_PROG_READ_DEVICE_ID_SET_REPEAT_WAIT_DONE: begin
+					if (interface_tx_ready) begin
+						state <= UPDI_PROG_READ_DEVICE_ID_READ;
+					end
+				end
+				
+				UPDI_PROG_READ_DEVICE_ID_READ: begin
+					state <= UPDI_PROG_READ_DEVICE_ID_READ_WAIT_DONE;
+				end
+
+				UPDI_PROG_READ_DEVICE_ID_READ_WAIT_DONE: begin
+					if (interface_rx_done) begin
+						state <= UPDI_PROG_READ_DEVICE_ID_GET_ID_BYTE0;
+					end
+				end
+
+				UPDI_PROG_READ_DEVICE_ID_GET_ID_BYTE0: begin
+					state <= UPDI_PROG_READ_DEVICE_ID_GET_ID_BYTE1;
+				end
+
+				UPDI_PROG_READ_DEVICE_ID_GET_ID_BYTE1: begin
+					state <= UPDI_PROG_READ_DEVICE_ID_GET_ID_BYTE2;
+				end
+
+				UPDI_PROG_READ_DEVICE_ID_GET_ID_BYTE2: begin
+					state <= UPDI_PROG_PROGRAM_ROM;
 				end
 				
 				UPDI_PROG_PROGRAM_ROM: begin
-				
+					
 				end
 				
 				UPDI_PROG_VERIFY_ROM: begin
@@ -393,6 +441,10 @@ module updi_programmer #(
 	end
 
 	always_comb begin
+		if (rst) begin
+			device_id = '{default: 'b0};
+		end
+
 		busy = 'b1;
 
 		double_break_start = 'b0;
@@ -651,8 +703,70 @@ module updi_programmer #(
 				end
 			end
 			
-			UPDI_PROG_READ_DEVICE_ID: begin
-			
+			UPDI_PROG_READ_DEVICE_ID_SET_RD_PTR: begin
+				// set the read pointer to 0x1100 (signatures base address)
+				instr_converter_en = 'b1;
+				instruction = UPDI_ST;
+				instr_ptr = 'b10;
+				instr_size_a = 'b01;
+
+				instr_data[0] = 'h00;
+				instr_data[1] = 'h11;
+				instr_data_len = 'd2;
+
+				instr_wait_ack_after[1] = 'b1;
+
+				interface_tx_start = 'b1;
+			end
+
+			UPDI_PROG_READ_DEVICE_ID_SET_REPEAT: begin
+				// want to repeat 2 times to read 3 bytes
+				instr_converter_en = 'b1;
+				instruction = UPDI_REPEAT;
+
+				instr_data[0] = 'd2;
+				instr_data_len = 'd1;
+
+				interface_tx_start = 'b1;
+			end
+
+			UPDI_PROG_READ_DEVICE_ID_READ: begin
+				// send LD command to load from (*ptr++)
+				instr_converter_en = 'b1;
+				instruction = UPDI_LD;
+				instr_ptr = 'b01;
+				instr_size_a = 'b00;
+
+				interface_tx_start = 'b1;
+				
+				// init data read of 3 byte
+				interface_rx_n_bytes = 'd3;
+				interface_rx_start = 'b1;
+			end
+
+			UPDI_PROG_READ_DEVICE_ID_READ_WAIT_DONE: begin
+				// if there is data in the FIFO, try to read it next clk cycle
+				if (interface_rx_ready) begin
+					out_rx_fifo_rd_en = 'b1;
+				end
+			end
+
+			UPDI_PROG_READ_DEVICE_ID_GET_ID_BYTE0: begin
+				// fill byte 0
+				device_id[0] = out_rx_fifo_data_out;
+				out_rx_fifo_rd_en = 'b1;
+			end
+
+			UPDI_PROG_READ_DEVICE_ID_GET_ID_BYTE1: begin
+				// fill byte 1
+				device_id[1] = out_rx_fifo_data_out;
+				out_rx_fifo_rd_en = 'b1;
+			end
+
+			UPDI_PROG_READ_DEVICE_ID_GET_ID_BYTE2: begin
+				// fill byte 2
+				device_id[2] = out_rx_fifo_data_out;
+				$display("Device ID: %06X", { device_id[0], device_id[1], device_id[2] });
 			end
 			
 			UPDI_PROG_PROGRAM_ROM: begin
