@@ -14,8 +14,11 @@ typedef enum {
 	UPDI_PROG_UNLOCK_CHIPERASE_READ_STATUS,
 	UPDI_PROG_UNLOCK_CHIPERASE_READ_STATUS_WAIT_DONE,
 	UPDI_PROG_UNLOCK_CHIPERASE_VERIFY_STATUS,
-	UPDI_PROG_UNLOCK_CHIPERASE_RESET_DEVICE,
-	UPDI_PROG_UNLOCK_CHIPERASE_WAIT_FINISH,
+	UPDI_PROG_UNLOCK_CHIPERASE_RESET_DEVICE_START,
+	UPDI_PROG_UNLOCK_CHIPERASE_RESET_DEVICE_START_WAIT_DONE,
+	UPDI_PROG_UNLOCK_CHIPERASE_RESET_DEVICE_WAIT_DELAY,
+	UPDI_PROG_UNLOCK_CHIPERASE_RESET_DEVICE_CLEAR,
+	UPDI_PROG_UNLOCK_CHIPERASE_RESET_DEVICE_CLEAR_WAIT_DONE,
 
 	UPDI_PROG_UNLOCK_NVMPROG,
 
@@ -236,17 +239,35 @@ module updi_programmer #(
 				end
 
 				UPDI_PROG_UNLOCK_CHIPERASE_VERIFY_STATUS: begin
-					state <= UPDI_PROG_UNLOCK_CHIPERASE_RESET_DEVICE;
+					state <= UPDI_PROG_UNLOCK_CHIPERASE_RESET_DEVICE_START;
 				end
 
-				UPDI_PROG_UNLOCK_CHIPERASE_RESET_DEVICE: begin
-					
+				UPDI_PROG_UNLOCK_CHIPERASE_RESET_DEVICE_START: begin
+					state <= UPDI_PROG_UNLOCK_CHIPERASE_RESET_DEVICE_START_WAIT_DONE;
 				end
 
-				UPDI_PROG_UNLOCK_CHIPERASE_WAIT_FINISH: begin
-					
+				UPDI_PROG_UNLOCK_CHIPERASE_RESET_DEVICE_START_WAIT_DONE: begin
+					if (interface_tx_ready) begin
+						state <= UPDI_PROG_UNLOCK_CHIPERASE_RESET_DEVICE_WAIT_DELAY;
+					end
 				end
-				
+
+				UPDI_PROG_UNLOCK_CHIPERASE_RESET_DEVICE_WAIT_DELAY: begin
+					if (delay_done) begin
+						state <= UPDI_PROG_UNLOCK_CHIPERASE_RESET_DEVICE_CLEAR;
+					end
+				end
+
+				UPDI_PROG_UNLOCK_CHIPERASE_RESET_DEVICE_CLEAR: begin
+					state <= UPDI_PROG_UNLOCK_CHIPERASE_RESET_DEVICE_CLEAR_WAIT_DONE;
+				end
+
+				UPDI_PROG_UNLOCK_CHIPERASE_RESET_DEVICE_CLEAR_WAIT_DONE: begin
+					if (interface_tx_ready) begin
+						state <= UPDI_PROG_UNLOCK_NVMPROG;
+					end
+				end
+
 				UPDI_PROG_UNLOCK_NVMPROG: begin
 				
 				end
@@ -286,6 +307,8 @@ module updi_programmer #(
 		interface_rx_start = 'b0;
 		interface_tx_start = 'b0;
 		out_rx_fifo_rd_en = 'b0;
+
+		delay_start = 'b0;
 		
 		case (state)
 			UPDI_PROG_IDLE: begin
@@ -362,14 +385,33 @@ module updi_programmer #(
 				end
 			end
 
-			UPDI_PROG_UNLOCK_CHIPERASE_RESET_DEVICE: begin
-				
+			UPDI_PROG_UNLOCK_CHIPERASE_RESET_DEVICE_START: begin
+				// store the system reset signature (0x59) into ASI_RESET_REQ (0x08)
+				instr_converter_en = 'b1;
+				instruction = UPDI_STCS;
+				instr_cs_addr = 'h8;
+
+				instr_data[0] = 'h59;
+				instr_data_len = 'd1;
+
+				interface_tx_start = 'b1;
+
+				// also, start the delay
+				delay_start = 'b1;
 			end
 
-			UPDI_PROG_UNLOCK_CHIPERASE_WAIT_FINISH: begin
-				
+			UPDI_PROG_UNLOCK_CHIPERASE_RESET_DEVICE_CLEAR: begin
+				// clear ASI_RESET_REQ (0x08)
+				instr_converter_en = 'b1;
+				instruction = UPDI_STCS;
+				instr_cs_addr = 'h8;
+
+				instr_data[0] = 'h00;
+				instr_data_len = 'd1;
+
+				interface_tx_start = 'b1;
 			end
-			
+
 			UPDI_PROG_UNLOCK_NVMPROG: begin
 			
 			end
