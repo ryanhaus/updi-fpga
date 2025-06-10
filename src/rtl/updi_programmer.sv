@@ -77,8 +77,8 @@ module updi_programmer #(
 	logic [3:0] instr_cs_addr;
 
 	logic [7:0] instr_data [MAX_INSTRUCTION_DATA_SIZE];
-	logic [DATA_ADDR_BITS-1 : 0] instr_data_len;
-	logic [MAX_INSTRUCTION_DATA_SIZE-1 : 0] instr_wait_ack_after;
+	logic [DATA_ADDR_BITS-1 : 0] instr_data_len, latched_instr_data_len;
+	logic [MAX_INSTRUCTION_DATA_SIZE-1 : 0] instr_wait_ack_after, latched_instr_wait_ack_after;
 
 	logic interface_tx_start, interface_tx_ready;
 	logic interface_rx_start, interface_rx_ready, interface_rx_done, interface_ack_error;
@@ -128,8 +128,8 @@ module updi_programmer #(
 		.sib(instr_sib),
 		.size_c(instr_size_c),
 		.data(instr_data),
-		.data_len(instr_data_len),
-		.wait_ack_after(instr_wait_ack_after),
+		.data_len(latched_instr_data_len),
+		.wait_ack_after(latched_instr_wait_ack_after),
 		.tx_start(interface_tx_start),
 		.tx_ready(interface_tx_ready),
 		.rx_n_bytes(interface_rx_n_bytes),
@@ -280,11 +280,8 @@ module updi_programmer #(
 		instr_size_c = 'b0;
 		instr_cs_addr = 'b0;
 		
-		if (instr_converter_en) begin
-			instr_data = '{default: 'b0};
-			instr_data_len = 'b0;
-			instr_wait_ack_after = 'b0;
-		end
+		instr_data_len = 'b0;
+		instr_wait_ack_after = 'b0;
 
 		interface_rx_start = 'b0;
 		interface_tx_start = 'b0;
@@ -393,6 +390,15 @@ module updi_programmer #(
 			
 			end
 		endcase
+	end
+
+	always_latch begin
+		// to keep instr_data_len, and instr_wait_ack_after in
+		// sync with opcode updates
+		if (instr_converter_en) begin
+			latched_instr_data_len = instr_data_len;
+			latched_instr_wait_ack_after = instr_wait_ack_after;
+		end
 	end
 
 endmodule
