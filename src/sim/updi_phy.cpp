@@ -62,7 +62,7 @@ void updi_phy::tick_fifo(Vtop* top)
 		last_tx_mod_tick = ticks;
 		this->tx_fifo.push(tx_val);
 
-		printf("From TX FIFO: 0x%02X\n", tx_val);
+		// printf("From TX FIFO: 0x%02X\n", tx_val);
 	}
 
 	// handle RX FIFO interface
@@ -73,7 +73,7 @@ void updi_phy::tick_fifo(Vtop* top)
 
 		top->uart_rx_fifo_data_out = rx_val;
 
-		printf("To RX FIFO: 0x%02X\n", rx_val);
+		// printf("To RX FIFO: 0x%02X\n", rx_val);
 	}
 }
 
