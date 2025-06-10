@@ -273,7 +273,7 @@ module updi_programmer #(
 				end
 				
 				UPDI_PROG_UNLOCK_CHIPERASE_WAIT_FINISH_READ_WAIT_DONE: begin
-					if (interface_rx_ready) begin
+					if (interface_rx_done) begin
 						state <= UPDI_PROG_UNLOCK_CHIPERASE_WAIT_FINISH_READ_VERIFY;
 					end
 				end
@@ -445,6 +445,10 @@ module updi_programmer #(
 				instr_cs_addr = 'hB;
 
 				interface_tx_start = 'b1;
+
+				// init data read of 1 byte
+				interface_rx_n_bytes = 'd1;
+				interface_rx_start = 'b1;
 			end
 
 			UPDI_PROG_UNLOCK_CHIPERASE_WAIT_FINISH_READ_WAIT_DONE: begin
