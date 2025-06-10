@@ -128,7 +128,7 @@ void updi_phy::tick_uart(Vtop* top)
 		else
 		{
 			// handle TX writes
-			if (this->tx_fifo.size() > 0 && (ticks - last_tx_mod_tick) >= 100)
+			if (this->tx_fifo.size() > 0 && (ticks - last_tx_mod_tick) > 1)
 			{
 				// fill array with FIFO values
 				std::vector<uint8_t> tx_bytes;
