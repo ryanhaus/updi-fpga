@@ -233,7 +233,7 @@ module updi_programmer #(
 				end
 
 				UPDI_PROG_UNLOCK_CHIPERASE_READ_STATUS_WAIT_DONE: begin
-					if (interface_tx_ready) begin
+					if (interface_rx_done) begin
 						state <= UPDI_PROG_UNLOCK_CHIPERASE_VERIFY_STATUS;
 					end
 				end
@@ -273,7 +273,7 @@ module updi_programmer #(
 				end
 				
 				UPDI_PROG_UNLOCK_CHIPERASE_WAIT_FINISH_READ_WAIT_DONE: begin
-					if (interface_tx_ready) begin
+					if (interface_rx_ready) begin
 						state <= UPDI_PROG_UNLOCK_CHIPERASE_WAIT_FINISH_READ_VERIFY;
 					end
 				end
@@ -383,10 +383,10 @@ module updi_programmer #(
 			end
 
 			UPDI_PROG_UNLOCK_CHIPERASE_READ_STATUS: begin
-				// send instruction to read ASI_SYS_STATUS register (0x0B)
+				// send instruction to read ASI_KEY_STATUS register (0x07)
 				instr_converter_en = 'b1;
 				instruction = UPDI_LDCS;
-				instr_cs_addr = 'hB; // ASI_SYS_STATUS
+				instr_cs_addr = 'h7;
 
 				interface_tx_start = 'b1;
 
@@ -403,8 +403,8 @@ module updi_programmer #(
 			end
 
 			UPDI_PROG_UNLOCK_CHIPERASE_VERIFY_STATUS: begin
-				// make sure status bit 3 == 0
-				if (out_rx_fifo_data_out[3] == 'b0) begin
+				// make sure status bit 3 == 1
+				if (out_rx_fifo_data_out[3] == 'b1) begin
 					valid = 'b1;
 				end
 
