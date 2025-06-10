@@ -12,7 +12,7 @@ $(PROG_MEM): $(PROG_HEX)
 generated: $(generated_objects)
 
 VERILATOR_FLAGS += -DROM_NAME=\"$(PROG_MEM)\"
-VERILATOR_FLAGS += -DROM_SIZE=$(shell stat -L -c %s $(PROG_MEM))
+VERILATOR_FLAGS += -DROM_SIZE=$(shell expr $$(( $(shell stat -L -c %s $(PROG_MEM)) / 3 )))
 
 # lint all verilog
 lint:
