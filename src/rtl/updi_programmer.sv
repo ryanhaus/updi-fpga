@@ -279,9 +279,12 @@ module updi_programmer #(
 		instr_ptr = 'b0;
 		instr_size_c = 'b0;
 		instr_cs_addr = 'b0;
-		// instr_data = '{default: 'b0};
-		// instr_data_len = 'b0;
-		// instr_wait_ack_after = 'b0;
+		
+		if (instr_converter_en) begin
+			instr_data = '{default: 'b0};
+			instr_data_len = 'b0;
+			instr_wait_ack_after = 'b0;
+		end
 
 		interface_rx_start = 'b0;
 		interface_tx_start = 'b0;
