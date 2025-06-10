@@ -19,8 +19,10 @@ typedef enum {
 	UPDI_PROG_UNLOCK_CHIPERASE_RESET_DEVICE_WAIT_DELAY,
 	UPDI_PROG_UNLOCK_CHIPERASE_RESET_DEVICE_CLEAR,
 	UPDI_PROG_UNLOCK_CHIPERASE_RESET_DEVICE_CLEAR_WAIT_DONE,
-
-	UPDI_PROG_UNLOCK_NVMPROG,
+	UPDI_PROG_UNLOCK_CHIPERASE_WAIT_FINISH_READ,
+	UPDI_PROG_UNLOCK_CHIPERASE_WAIT_FINISH_READ_WAIT_DONE,
+	UPDI_PROG_UNLOCK_CHIPERASE_WAIT_FINISH_READ_VERIFY,
+	UPDI_PROG_UNLOCK_CHIPERASE_WAIT_FINISH_WAIT_DELAY,
 
 	UPDI_PROG_READ_DEVICE_ID,
 	UPDI_PROG_PROGRAM_ROM,
@@ -175,6 +177,7 @@ module updi_programmer #(
 
 	// State machine
 	updi_programmer_state state;
+	logic valid;
 
 	always_ff @(posedge clk) begin
 		if (rst) begin
@@ -261,7 +264,29 @@ module updi_programmer #(
 
 				UPDI_PROG_UNLOCK_CHIPERASE_RESET_DEVICE_CLEAR_WAIT_DONE: begin
 					if (interface_tx_ready) begin
-						state <= UPDI_PROG_UNLOCK_NVMPROG;
+						state <= UPDI_PROG_UNLOCK_CHIPERASE_WAIT_FINISH_READ;
+					end
+				end
+				
+				UPDI_PROG_UNLOCK_CHIPERASE_WAIT_FINISH_READ: begin
+					state <= UPDI_PROG_UNLOCK_CHIPERASE_WAIT_FINISH_READ_WAIT_DONE;
+				end
+				
+				UPDI_PROG_UNLOCK_CHIPERASE_WAIT_FINISH_READ_WAIT_DONE: begin
+					if (interface_tx_ready) begin
+						state <= UPDI_PROG_UNLOCK_CHIPERASE_WAIT_FINISH_READ_VERIFY;
+					end
+				end
+				
+				UPDI_PROG_UNLOCK_CHIPERASE_WAIT_FINISH_READ_VERIFY: begin
+					state <= valid
+						? UPDI_PROG_UNLOCK_NVMPROG_SEND_KEY
+						: UPDI_PROG_UNLOCK_CHIPERASE_WAIT_FINISH_WAIT_DELAY;
+				end
+
+				UPDI_PROG_UNLOCK_CHIPERASE_WAIT_FINISH_WAIT_DELAY: begin
+					if (delay_done) begin
+						state <= UPDI_PROG_UNLOCK_CHIPERASE_WAIT_FINISH_READ;
 					end
 				end
 
@@ -306,6 +331,8 @@ module updi_programmer #(
 		out_rx_fifo_rd_en = 'b0;
 
 		delay_start = 'b0;
+
+		valid = 'b0;
 		
 		case (state)
 			UPDI_PROG_IDLE: begin
@@ -338,10 +365,11 @@ module updi_programmer #(
 
 			UPDI_PROG_READ_UPDI_STATUS_VERIFY: begin
 				// make sure status != 0x00
-				if (out_rx_fifo_data_out == 'h00) begin
-					// TODO: make synthesizable
-					$error();
+				if (out_rx_fifo_data_out != 'h00) begin
+					valid = 'b1;
 				end
+
+				if (!valid) $error();
 			end
 
 			UPDI_PROG_UNLOCK_CHIPERASE_SEND_KEY: begin
@@ -376,10 +404,11 @@ module updi_programmer #(
 
 			UPDI_PROG_UNLOCK_CHIPERASE_VERIFY_STATUS: begin
 				// make sure status bit 3 == 0
-				if (out_rx_fifo_data_out[3] != 'b0) begin
-					// TODO: make synthesizable
-					$error();
+				if (out_rx_fifo_data_out[3] == 'b0) begin
+					valid = 'b1;
 				end
+
+				if (!valid) $error();
 			end
 
 			UPDI_PROG_UNLOCK_CHIPERASE_RESET_DEVICE_START: begin
@@ -409,8 +438,32 @@ module updi_programmer #(
 				interface_tx_start = 'b1;
 			end
 
-			UPDI_PROG_UNLOCK_NVMPROG: begin
-			
+			UPDI_PROG_UNLOCK_CHIPERASE_WAIT_FINISH_READ: begin
+				// read ASI_SYS_STATUS (0x0B)
+				instr_converter_en = 'b1;
+				instruction = UPDI_LDCS;
+				instr_cs_addr = 'hB;
+
+				interface_tx_start = 'b1;
+			end
+
+			UPDI_PROG_UNLOCK_CHIPERASE_WAIT_FINISH_READ_WAIT_DONE: begin
+				// if there is data in the FIFO, try to read it next clk cycle
+				if (!out_rx_fifo_empty) begin
+					out_rx_fifo_rd_en = 'b1;
+				end
+			end
+
+			UPDI_PROG_UNLOCK_CHIPERASE_WAIT_FINISH_READ_VERIFY: begin
+				// check if bit 1 is 0
+				if (out_rx_fifo_data_in[0] == 'b0) begin
+					valid = 'b1;
+				end
+
+				// if it's not, start the delay
+				if (!valid) begin
+					delay_start = 'b1;
+				end
 			end
 			
 			UPDI_PROG_READ_DEVICE_ID: begin
