@@ -8,7 +8,7 @@ module tb_updi_instruction_queue_handler();
 	logic clk, rst, start, ready, waiting_for_ack, ack_received, fifo_wr_en, fifo_full;
 	logic [7:0] opcode, fifo_data;
 	logic [7:0] data [MAX_DATA_SIZE];
-	logic [DATA_ADDR_BITS-1 : 0] data_len;
+	logic [DATA_ADDR_BITS : 0] data_len;
 	logic [MAX_DATA_SIZE-1 : 0] wait_ack_after;
 	logic [7:0] fifo_out;
 	logic fifo_rd_en, fifo_empty;
