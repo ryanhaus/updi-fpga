@@ -110,7 +110,7 @@ module updi_programmer #(
 	output uart_rx_fifo_rd_en,
 	input uart_rx_fifo_empty,
 	
-	output double_break_start,
+	output logic double_break_start,
 	input double_break_busy,
 	input double_break_done
 );
