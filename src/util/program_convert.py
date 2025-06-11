@@ -3,6 +3,8 @@ Converts an Intel hex file (like what would be generated
 by avr-gcc or Arduino IDE) into a format readable by Verilog's
 $readmemh function. Will also convert the file into segments of
 64 bytes, and strip away the colon & checksum.
+Will also add 0x8000 to addresses so they get written to the
+correct region in memory.
 See https://developer.arm.com/documentation/ka003292/latest/
 """
 import sys
@@ -52,13 +54,21 @@ def main():
             
             # follow Intel hex format order
             wr_bytes.append(chunk_size)
-            wr_bytes += split_to_bytes(addr)
+            addr_bytes = split_to_bytes(addr + 0x8000)
+            addr_bytes.reverse()
+            wr_bytes += addr_bytes
             wr_bytes.append(0x00) # indicates data record
 
             for j in range(addr, addr+chunk_size):
                 wr_bytes.append(ihex[j])
 
             addr += chunk_size
+
+        # add stop block
+        wr_bytes.append(0x00);
+        wr_bytes += [ 0x00, 0x00 ]
+        wr_bytes.append(0x01)
+
 
     # convert buffer to text & write to file
     print("Writing to file...")
