@@ -37,7 +37,7 @@ module program_decoder #(
 
 	// program decoder state machine
 	program_decoder_state state;
-	logic [DATA_BLOCK_ADDR_BITS-1 : 0] counter;
+	logic [7:0] counter;
 
 	always_ff @(posedge clk) begin
 		if (rst) begin
@@ -99,15 +99,15 @@ module program_decoder #(
 					// read block_length bytes from ROM
 					if (counter < block_length) begin
 						// keep reading until done
-						block_data[counter] <= prog_data;
+						block_data[counter[DATA_BLOCK_ADDR_BITS-1 : 0]] <= prog_data;
 						prog_addr <= prog_addr + 'b1;
 						counter <= counter + 'b1;
 					end
 					else begin
 						// once block_length bytes have been read, block is
 						// finished
-						done <= 'b1;
 						ready <= 'b1;
+						done <= 'b1;
 						state <= PROG_DECODER_IDLE;
 					end
 				end

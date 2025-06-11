@@ -64,7 +64,7 @@ module updi_programmer #(
 	parameter MAX_INSTRUCTION_DATA_SIZE = 64,
 	parameter DATA_ADDR_BITS = $clog2(MAX_INSTRUCTION_DATA_SIZE),
 	
-	parameter DATA_BLOCK_MAX_SIZE = 2 ** (DATA_ADDR_BITS + 1),
+	parameter DATA_BLOCK_MAX_SIZE = MAX_INSTRUCTION_DATA_SIZE,
 
 	parameter RX_OUT_FIFO_DEPTH = 16,
 
@@ -106,7 +106,7 @@ module updi_programmer #(
 	logic [3:0] instr_cs_addr;
 
 	logic [7:0] instr_data [MAX_INSTRUCTION_DATA_SIZE];
-	logic [DATA_ADDR_BITS-1 : 0] instr_data_len, latched_instr_data_len;
+	logic [DATA_ADDR_BITS:0] instr_data_len, latched_instr_data_len;
 	logic [MAX_INSTRUCTION_DATA_SIZE-1 : 0] instr_wait_ack_after, latched_instr_wait_ack_after;
 
 	logic interface_tx_start, interface_tx_ready;
@@ -780,7 +780,8 @@ module updi_programmer #(
 	end
 
 	always_latch begin
-		// to keep instr_data_len, and instr_wait_ack_after in
+		// to keep instr_data_len, and instr_wait_ack_after in // 1 extra bit
+		// for sending the whole buffer
 		// sync with opcode updates
 		if (instr_converter_en) begin
 			latched_instr_data_len = instr_data_len;

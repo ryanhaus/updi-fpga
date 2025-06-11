@@ -19,7 +19,7 @@ module updi_interface #(
 
 	// instruction data inputs
 	input [7:0] data [MAX_DATA_SIZE],
-	input [DATA_ADDR_BITS-1 : 0] data_len,
+	input [DATA_ADDR_BITS:0] data_len, // 1 extra bit for sending the whole buffer
 	input [MAX_DATA_SIZE-1 : 0] wait_ack_after,
 
 	// tx control signals
