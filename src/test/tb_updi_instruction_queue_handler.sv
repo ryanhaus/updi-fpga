@@ -34,6 +34,8 @@ module tb_updi_instruction_queue_handler();
 
 	integer i;
 
+	initial #100000 $error();
+
 	initial begin
 		$dumpfile("trace/tb_updi_instruction_queue_handler.fst");
 		$dumpvars();

@@ -39,48 +39,49 @@ module updi_instruction_queue_handler #(
 	logic [DATA_ADDR_BITS : 0] counter;
 
 	always_ff @(posedge clk) begin
-		fifo_wr_en = 'b0;
-		waiting_for_ack = 'b0;
+		fifo_wr_en <= 'b0;
+		waiting_for_ack <= 'b0;
 
 		if (rst) begin
-			state = UPDI_INSTR_HDLR_IDLE;
-			ready = 'b0;
-			fifo_data = 'b0;
+			state <= UPDI_INSTR_HDLR_IDLE;
+			ready <= 'b0;
+			fifo_data <= 'b0;
 		end
 		else begin
 			case (state)
 				UPDI_INSTR_HDLR_IDLE: begin
 					// remain idle until start flag
-					ready = 'b1;
-
 					if (start) begin
-						ready = 'b0;
-						state = UPDI_INSTR_HDLR_WR_SYNCH;
+						ready <= 'b0;
+						state <= UPDI_INSTR_HDLR_WR_SYNCH;
+					end
+					else begin
+						ready <= 'b1;
 					end
 				end
 				
 				UPDI_INSTR_HDLR_WR_SYNCH: begin
 					// send SYNCH character (0x55)
 					if (!fifo_full) begin
-						fifo_data = 'h55;
-						fifo_wr_en = 'b1;
-						state = UPDI_INSTR_HDLR_WR_OPCODE;
+						fifo_data <= 'h55;
+						fifo_wr_en <= 'b1;
+						state <= UPDI_INSTR_HDLR_WR_OPCODE;
 					end
 				end
 
 				UPDI_INSTR_HDLR_WR_OPCODE: begin
 					// push opcode to FIFO if possible
 					if (!fifo_full) begin
-						fifo_data = opcode;
-						fifo_wr_en = 'b1;
+						fifo_data <= opcode;
+						fifo_wr_en <= 'b1;
 
 						// if there is data, write that, otherwise idle
 						if (data_len > 'b0) begin
-							counter = 'b0;
-							state = UPDI_INSTR_HDLR_WR_DATA;
+							counter <= 'b0;
+							state <= UPDI_INSTR_HDLR_WR_DATA;
 						end
 						else begin
-							state = UPDI_INSTR_HDLR_IDLE;
+							state <= UPDI_INSTR_HDLR_IDLE;
 						end
 					end
 				end
@@ -88,37 +89,38 @@ module updi_instruction_queue_handler #(
 				UPDI_INSTR_HDLR_WR_DATA: begin
 					if (!fifo_full) begin
 						// continually push data to FIFO if possible
-						fifo_data = data[counter[DATA_ADDR_BITS-1 : 0]];
-						fifo_wr_en = 'b1;
+						fifo_data <= data[counter[DATA_ADDR_BITS-1 : 0]];
+						fifo_wr_en <= 'b1;
 
 						// if done writing data, go back to idle, otherwise
 						// keep going
 						if (wait_ack_after[counter[DATA_ADDR_BITS-1 : 0]] == 'b1 && !ack_received) begin
-							state = UPDI_INSTR_HDLR_WAIT_ACK;
+							state <= UPDI_INSTR_HDLR_WAIT_ACK;
 						end
 						else if (counter == data_len - 'b1) begin
-							state = UPDI_INSTR_HDLR_IDLE;
+							state <= UPDI_INSTR_HDLR_IDLE;
 						end
 						else begin
-							counter = counter + 'b1;
+							counter <= counter + 'b1;
 						end
 					end
 				end
 
 				UPDI_INSTR_HDLR_WAIT_ACK: begin
 					// wait for ack signal in between data bytes
-					waiting_for_ack = 'b1;
-
 					if (ack_received) begin
-						waiting_for_ack = 'b0;
+						waiting_for_ack <= 'b0;
 							
 						if (counter == data_len - 'b1) begin
-							state = UPDI_INSTR_HDLR_IDLE;
+							state <= UPDI_INSTR_HDLR_IDLE;
 						end
 						else begin
-							counter = counter + 'b1;
-							state = UPDI_INSTR_HDLR_WR_DATA;
+							counter <= counter + 'b1;
+							state <= UPDI_INSTR_HDLR_WR_DATA;
 						end
+					end
+					else begin
+						waiting_for_ack <= 'b1;
 					end
 				end
 			endcase
