@@ -14,8 +14,16 @@ generated: $(generated_objects)
 VERILATOR_FLAGS += -DROM_NAME=\"$(PROG_MEM)\"
 VERILATOR_FLAGS += -DROM_SIZE=$(shell expr $$(( $(shell stat -L -c %s $(PROG_MEM)) / 3 )))
 
+test_srcs := $(wildcard src/test/*.sv)
+test_names := $(patsubst src/test/%.sv,%,$(test_srcs))
+test_objects := $(patsubst %,obj_dir/V%,$(test_names))
+test_lint_targets := $(patsubst %,test_lint_%,$(test_names))
+
+
 # lint all verilog
-lint:
+lint: sim_lint test_lint
+
+sim_lint:
 	verilator \
 		$(VERILATOR_FLAGS) \
 		-y src/rtl \
@@ -23,6 +31,18 @@ lint:
 		-sv \
 		--lint-only \
 		--top-module top
+
+test_lint: $(test_lint_targets)
+
+test_lint_%:
+	verilator \
+		$(VERILATOR_FLAGS) \
+		-y src/rtl \
+		src/*/*.sv \
+		-sv \
+		--lint-only \
+		--timing \
+		--top-module $*
 
 # generate simulation binary
 sim: obj_dir/Vtop
@@ -70,10 +90,6 @@ test_run_%: obj_dir/Vtb_%
 	obj_dir/Vtb_$*
 
 # for building and running all testbenches
-test_srcs := $(wildcard src/test/*.sv)
-test_names := $(patsubst src/test/%.sv,%,$(test_srcs))
-test_objects := $(patsubst %,obj_dir/V%,$(test_names))
-
 test: $(test_objects)
 
 test_run: test
