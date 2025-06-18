@@ -11,7 +11,7 @@ The two modules interface with each other via FIFOs. A block diagram showing the
 ## Simulating
 [Verilator](https://www.veripool.org/verilator/) is used to simulate the design.<br/>
 Run `make sim` to compile the simulation binary, or `make sim_run` to compile and run the simulation.<br/>
-The assumptions of the simulation are that a USB to UART converter is plugged in on `/dev/ttyUSB0`, and a UART to UPDI cable is attached to the output of this.
+The assumptions of the simulation are that a USB to UART converter is plugged in on `/dev/ttyUSB0`, and a [UART to UPDI cable](https://github.com/SpenceKonde/AVR-Guidance/blob/master/UPDI/jtag2updi.md#connections) is attached to the output of this.
 
 ### Running Tests
 Each individual test will be compiled to its own binary using [Verilator](https://www.veripool.org/verilator/).<br/>
