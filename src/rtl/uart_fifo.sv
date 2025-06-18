@@ -127,14 +127,13 @@ module uart_fifo #(
 				end
 
 				UART_FIFO_TX_READ_FIFO: begin
-					// pop a value from the FIFO
-					tx_fifo_rd_en <= 'b1;
-
-					// if UART is ready, start transmission, otherwise wait
+					// if UART is ready, pop a value from FIFO & start transmission, otherwise wait
 					if (transmit_ready) begin
+						tx_fifo_rd_en <= 'b1;
 						tx_state <= UART_FIFO_TX_TRANSMISSION_START;
 					end
 					else begin
+						tx_fifo_rd_en <= 'b1;
 						tx_state <= UART_FIFO_TX_WAIT_UART_READY;
 					end
 				end
