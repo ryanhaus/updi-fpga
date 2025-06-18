@@ -25,7 +25,7 @@ module updi_phy #(
 	output double_break_done,
 
 	// UPDI output
-	output updi
+	inout updi
 );
 
 	logic tx, rx;
