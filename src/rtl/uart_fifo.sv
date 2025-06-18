@@ -154,6 +154,8 @@ module uart_fifo #(
 					tx_fifo_rd_en <= 'b0;
 
 					if (!transmit_ready) begin
+						transmit_start <= 'b0;
+
 						// if there is still data, skip going back to idle and
 						// start processing that data
 						if (!tx_fifo_empty) begin
