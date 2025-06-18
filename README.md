@@ -27,3 +27,8 @@ For building/running individual tests, use `make test_NAME` and `make test_run_N
 
 ## Hardware
 TBD
+
+## Potential Future Improvements
+- Clean up the `updi_programmer` module, it is very bloated right now.
+- Maybe have the ROM be a separate module, or even make it writeable.
+- AXI bus interface?
