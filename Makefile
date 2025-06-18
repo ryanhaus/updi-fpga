@@ -42,7 +42,7 @@ test_lint_%:
 		-sv \
 		--lint-only \
 		--timing \
-		--top-module $*
+		--top-module tb_$*
 
 # generate simulation binary
 sim: obj_dir/Vtop
