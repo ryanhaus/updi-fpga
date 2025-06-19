@@ -32,3 +32,4 @@ TBD
 - Clean up the `updi_programmer` module, it is very bloated right now.
 - Maybe have the ROM be a separate module, or even make it writeable.
 - AXI bus interface?
+- Watchdog/timeout thing to reset programming interface/retry last command, also for when errors are detected.
