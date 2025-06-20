@@ -589,7 +589,8 @@ module updi_programmer #(
 				end
 				
 				UPDI_PROG_VERIFY_ROM: begin
-				
+					// TODO
+					state <= UPDI_PROG_IDLE;
 				end
 			endcase
 		end
