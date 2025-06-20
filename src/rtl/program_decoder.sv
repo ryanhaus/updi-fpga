@@ -53,10 +53,10 @@ module program_decoder #(
 				PROG_DECODER_IDLE: begin
 					// wait idle until start signal
 					ready <= 'b1;
+					done <= 'b0;
 					counter <= 'b0;
 
 					if (start) begin
-						done <= 'b0;
 						ready <= 'b0;
 						state <= PROG_DECODER_READ_LENGTH;
 					end
