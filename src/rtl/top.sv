@@ -5,6 +5,7 @@ module top (
 	input rst,
 	input start,
 	output busy,
+	input phy_error,
 
 	output [7:0] uart_tx_fifo_data_in,
 	output uart_tx_fifo_wr_en,
@@ -33,6 +34,7 @@ module top (
 		.rst(rst),
 		.start(start),
 		.busy(busy),
+		.phy_error(phy_error),
 		.uart_tx_fifo_data_in(uart_tx_fifo_data_in),
 		.uart_tx_fifo_wr_en(uart_tx_fifo_wr_en),
 		.uart_tx_fifo_full(uart_tx_fifo_full),

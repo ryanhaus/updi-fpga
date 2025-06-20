@@ -33,4 +33,3 @@ TBD
 - Maybe have the ROM be a separate module, or even make it a writeable form of memory.
 - AXI bus interface?
 - ROM verification
-- Watchdog/timeout thing to reset programming interface/retry last command, also for when errors are detected.
