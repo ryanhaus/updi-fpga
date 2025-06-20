@@ -134,7 +134,7 @@ module updi_programmer #(
 	logic [MAX_INSTRUCTION_DATA_SIZE-1 : 0] instr_wait_ack_after, latched_instr_wait_ack_after;
 
 	logic interface_tx_start, interface_tx_ready;
-	logic interface_rx_start, interface_rx_ready, interface_rx_done, interface_ack_error;
+	logic interface_rx_start, interface_rx_ready, interface_rx_done, interface_ack_error, interface_rx_timeout;
 	logic [DATA_ADDR_BITS-1 : 0] interface_rx_n_bytes;
 
 	logic [7:0] out_rx_fifo_data_in;
@@ -189,6 +189,7 @@ module updi_programmer #(
 		.rx_start(interface_rx_start),
 		.rx_ready(interface_rx_ready),
 		.rx_done(interface_rx_done),
+		.rx_timeout(interface_rx_timeout),
 		.ack_error(interface_ack_error),
 		.out_rx_fifo_data(out_rx_fifo_data_in),
 		.out_rx_fifo_wr_en(out_rx_fifo_wr_en),

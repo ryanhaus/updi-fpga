@@ -31,6 +31,7 @@ module updi_interface #(
 	input rx_start,
 	output rx_ready,
 	output rx_done,
+	output rx_timeout,
 	output ack_error,
 
 	// output rx data FIFO interface
@@ -96,6 +97,7 @@ module updi_interface #(
 		.start(rx_start),
 		.ready(rx_ready),
 		.done(rx_done),
+		.timeout(rx_timeout),
 		.in_fifo_data(uart_rx_fifo_data),
 		.in_fifo_empty(uart_rx_fifo_empty),
 		.in_fifo_rd_en(uart_rx_fifo_rd_en),

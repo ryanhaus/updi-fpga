@@ -13,7 +13,8 @@ typedef enum {
 // normal mode, a certain number of received values are forwarded to another
 // FIFO.
 module updi_input_handler #(
-	parameter BITS_N = 6 // number of bits for the 'n_bytes' parameter, which determines number of bytes read
+	parameter BITS_N = 6, // number of bits for the 'n_bytes' parameter, which determines number of bytes read
+	parameter TIMEOUT_CLKS = 1000 // number of clocks without a response to constitute a timeout
 ) (
 	input clk,
 	input rst,
@@ -28,6 +29,7 @@ module updi_input_handler #(
 	input start,
 	output logic ready,
 	output logic done, // high for 1 clock signal
+	output logic timeout,
 
 	// input FIFO interface (should be opposite clocked)
 	input [7:0] in_fifo_data,
@@ -40,6 +42,17 @@ module updi_input_handler #(
 	output logic out_fifo_wr_en
 );
 
+	// delay module for detecting timeouts
+	logic timeout_rst, timeout_start, timeout_done;
+
+	delay #(.N_CLKS(TIMEOUT_CLKS)) timeout_delay_inst (
+		.clk(clk),
+		.rst(rst | timeout_rst),
+		.start(timeout_start),
+		.done(timeout_done)
+	);
+
+	// state machine
 	updi_input_handler_state state;
 	logic [BITS_N-1 : 0] counter;
 	assign out_fifo_data = in_fifo_data;
@@ -62,6 +75,10 @@ module updi_input_handler #(
 				end
 
 				UPDI_IN_HDLR_READ_ACK: begin
+					if (timeout_done) begin
+						state <= UPDI_IN_HDLR_IDLE;
+					end
+
 					if (!in_fifo_empty) begin
 						state <= UPDI_IN_HDLR_CHECK_ACK;
 					end
@@ -72,6 +89,10 @@ module updi_input_handler #(
 				end
 
 				UPDI_IN_HDLR_FIFO_READ: begin
+					if (timeout_done) begin
+						state <= UPDI_IN_HDLR_IDLE;
+					end
+
 					if (!in_fifo_empty) begin
 						state <= UPDI_IN_HDLR_FIFO_WRITE;
 					end
@@ -103,6 +124,9 @@ module updi_input_handler #(
 		ack_received = 'b0;
 		ack_error = 'b0;
 		done = 'b0;
+		timeout = 'b0;
+		timeout_rst = 'b1;
+		timeout_start = 'b0;
 
 		case (state)
 			UPDI_IN_HDLR_IDLE: begin
@@ -110,6 +134,13 @@ module updi_input_handler #(
 			end
 
 			UPDI_IN_HDLR_READ_ACK: begin
+				timeout_start = 'b1;
+				timeout_rst = 'b0;
+
+				if (timeout_done) begin
+					timeout = 'b1;
+				end
+
 				if (!in_fifo_empty) begin
 					in_fifo_rd_en = 'b1;
 				end
@@ -127,6 +158,13 @@ module updi_input_handler #(
 			end
 
 			UPDI_IN_HDLR_FIFO_READ: begin
+				timeout_start = 'b1;
+				timeout_rst = 'b0;
+
+				if (timeout_done) begin
+					timeout = 'b1;
+				end
+
 				if (!in_fifo_empty) begin
 					in_fifo_rd_en = 'b1;
 				end
