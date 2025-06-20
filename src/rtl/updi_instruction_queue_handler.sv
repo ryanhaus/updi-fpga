@@ -117,6 +117,7 @@ module updi_instruction_queue_handler #(
 							
 						if (counter == data_len - 'b1) begin
 							state <= UPDI_INSTR_HDLR_IDLE;
+							done <= 'b1;
 						end
 						else begin
 							counter <= counter + 'b1;
