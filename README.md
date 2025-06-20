@@ -30,6 +30,7 @@ TBD
 
 ## Potential Future Improvements
 - Clean up the `updi_programmer` module, it is very bloated right now.
-- Maybe have the ROM be a separate module, or even make it writeable.
+- Maybe have the ROM be a separate module, or even make it a writeable form of memory.
 - AXI bus interface?
+- ROM verification
 - Watchdog/timeout thing to reset programming interface/retry last command, also for when errors are detected.
