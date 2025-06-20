@@ -71,6 +71,7 @@ module top (
 	logic [7:0] uart_tx_fifo_data_in, uart_rx_fifo_data_out;
 	logic uart_tx_fifo_wr_en, uart_tx_fifo_full;
 	logic uart_rx_fifo_rd_en, uart_rx_fifo_empty;
+	logic phy_error;
 
 	updi_programmer #(
 		.ROM_FILE_NAME("program.mem"),
@@ -81,6 +82,7 @@ module top (
 		.rst(rst),
 		.start(programmer_start),
 		.busy(programmer_busy),
+		.phy_error(phy_error),
 		.uart_tx_fifo_data_in(uart_tx_fifo_data_in),
 		.uart_tx_fifo_wr_en(uart_tx_fifo_wr_en),
 		.uart_tx_fifo_full(uart_tx_fifo_full),
@@ -103,6 +105,7 @@ module top (
 		.uart_tx_fifo_wr_en(uart_tx_fifo_wr_en),
 		.uart_tx_fifo_full(uart_tx_fifo_full),
 		.uart_rx_fifo_data(uart_rx_fifo_data_out),
+		.rx_error(phy_error),
 		.uart_rx_fifo_rd_en(uart_rx_fifo_rd_en),
 		.uart_rx_fifo_empty(uart_rx_fifo_empty),
 		.double_break_start(double_break_start),
