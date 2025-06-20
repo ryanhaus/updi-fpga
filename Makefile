@@ -17,7 +17,7 @@ VERILATOR_FLAGS += -DROM_SIZE=$(shell expr $$(( $(shell stat -L -c %s $(PROG_MEM
 test_srcs := $(wildcard src/test/*.sv)
 test_names := $(patsubst src/test/%.sv,%,$(test_srcs))
 test_objects := $(patsubst %,obj_dir/V%,$(test_names))
-test_lint_targets := $(patsubst %,test_lint_%,$(test_names))
+test_lint_targets := $(patsubst tb_%,test_lint_%,$(test_names))
 
 
 # lint all verilog
