@@ -2,16 +2,17 @@
 module tb_updi_input_handler();
 
 	parameter BITS_N = 6;
+	parameter TIMEOUT_CLKS = 25;
 
 	// updi_input_handler instance (posedge)
-	logic clk, rst, wait_ack, ack_received, ack_error, start, done, ready, in_fifo_empty, in_fifo_rd_en, out_fifo_full, out_fifo_wr_en;
+	logic clk, rst, wait_ack, ack_received, ack_error, start, done, ready, timeout, in_fifo_empty, in_fifo_rd_en, out_fifo_full, out_fifo_wr_en;
 	logic [7:0] in_fifo_data, out_fifo_data;
 	logic [BITS_N-1 : 0] n_bytes;
 
-	updi_input_handler #(.BITS_N(BITS_N)) dut (
+	updi_input_handler #(.BITS_N(BITS_N), .TIMEOUT_CLKS(TIMEOUT_CLKS)) dut (
 		clk, rst,
 		wait_ack, ack_received, ack_error,
-		n_bytes, start, ready, done,
+		n_bytes, start, ready, done, timeout,
 		in_fifo_data, in_fifo_empty, in_fifo_rd_en,
 		out_fifo_data, out_fifo_full, out_fifo_wr_en
 	);
@@ -150,6 +151,50 @@ module tb_updi_input_handler();
 		end
 
 		tx_fifo_rd_en = 'b0;
+
+		// test timeout for no data received
+		i = 0;
+		n_bytes = 'd1;
+		start = 'b1;
+		#10 clk = 'b0;
+		#10 clk = 'b1;
+		start = 'b0;
+
+		while (!timeout) begin
+			#10 clk = 'b0;
+			#10 clk = 'b1;
+
+			i = i + 1;
+		end
+
+		if (i != TIMEOUT_CLKS) $error();
+
+		while (!ready) begin
+			#10 clk = 'b0;
+			#10 clk = 'b1;
+		end
+
+		// test timeout for no ACK received
+		i = 0;
+		wait_ack = 'b1;
+		#10 clk = 'b0;
+		#10 clk = 'b1;
+		wait_ack = 'b0;
+
+
+		while (!timeout) begin
+			#10 clk = 'b0;
+			#10 clk = 'b1;
+
+			i = i + 1;
+		end
+
+		$display("%d", i);
+
+		while (!ready) begin
+			#10 clk = 'b0;
+			#10 clk = 'b1;
+		end
 
 		$finish;
 	end
