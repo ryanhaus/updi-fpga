@@ -233,11 +233,13 @@ module updi_programmer #(
 	);
 
 	// State machine
-	updi_programmer_state state;
+	updi_programmer_state state, prev_state;
 	logic [7:0] device_id [3];
-	logic valid;
+	logic valid, first_clock;
 
 	always_ff @(posedge clk) begin
+		prev_state <= state;
+
 		if (rst) begin
 			state <= UPDI_PROG_IDLE;
 		end
@@ -601,6 +603,8 @@ module updi_programmer #(
 		if (rst | error) begin
 			device_id = '{default: 'b0};
 		end
+
+		first_clock = (state != prev_state);
 
 		busy = 'b1;
 
