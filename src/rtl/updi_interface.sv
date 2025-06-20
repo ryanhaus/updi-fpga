@@ -26,6 +26,7 @@ module updi_interface #(
 	// tx control signals
 	input tx_start,
 	output tx_ready,
+	output tx_done,
 
 	// rx control signals
 	input [DATA_ADDR_BITS-1 : 0] rx_n_bytes,
@@ -76,6 +77,7 @@ module updi_interface #(
 		.rst(rst),
 		.start(tx_start),
 		.ready(tx_ready),
+		.done(tx_done),
 		.waiting_for_ack(waiting_for_ack),
 		.ack_received(ack_received),
 		.opcode(opcode),

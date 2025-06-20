@@ -5,7 +5,7 @@ module tb_updi_instruction_queue_handler();
 	parameter DATA_ADDR_BITS = $clog2(MAX_DATA_SIZE);
 
 	// signals
-	logic clk, rst, start, ready, waiting_for_ack, ack_received, fifo_wr_en, fifo_full;
+	logic clk, rst, start, ready, done, waiting_for_ack, ack_received, fifo_wr_en, fifo_full;
 	logic [7:0] opcode, fifo_data;
 	logic [7:0] data [MAX_DATA_SIZE];
 	logic [DATA_ADDR_BITS : 0] data_len;
@@ -27,7 +27,7 @@ module tb_updi_instruction_queue_handler();
 		.DATA_ADDR_BITS(DATA_ADDR_BITS)
 	) dut (
 		clk, rst,
-		start, ready, waiting_for_ack, ack_received,
+		start, ready, done, waiting_for_ack, ack_received,
 		opcode, data, data_len, wait_ack_after,
 		fifo_data, fifo_wr_en, fifo_full
 	);

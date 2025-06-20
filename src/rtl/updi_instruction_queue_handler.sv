@@ -19,6 +19,7 @@ module updi_instruction_queue_handler #(
 	// control signals
 	input start,
 	output logic ready,
+	output logic done,
 	output logic waiting_for_ack,
 	input ack_received,
 	
@@ -41,6 +42,7 @@ module updi_instruction_queue_handler #(
 	always_ff @(posedge clk) begin
 		fifo_wr_en <= 'b0;
 		waiting_for_ack <= 'b0;
+		done <= 'b0;
 
 		if (rst) begin
 			state <= UPDI_INSTR_HDLR_IDLE;
@@ -82,6 +84,7 @@ module updi_instruction_queue_handler #(
 						end
 						else begin
 							state <= UPDI_INSTR_HDLR_IDLE;
+							done <= 'b1;
 						end
 					end
 				end
@@ -99,6 +102,7 @@ module updi_instruction_queue_handler #(
 						end
 						else if (counter == data_len - 'b1) begin
 							state <= UPDI_INSTR_HDLR_IDLE;
+							done <= 'b1;
 						end
 						else begin
 							counter <= counter + 'b1;
