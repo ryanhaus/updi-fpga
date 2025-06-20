@@ -2,7 +2,8 @@
 // sending/receiving data and UART FIFO
 module updi_interface #(
 	parameter MAX_DATA_SIZE = 16,
-	parameter DATA_ADDR_BITS = $clog2(MAX_DATA_SIZE)
+	parameter DATA_ADDR_BITS = $clog2(MAX_DATA_SIZE),
+	parameter TIMEOUT_CLKS = 100
 ) (
 	input clk,
 	input rst,
@@ -87,7 +88,10 @@ module updi_interface #(
 	);
 
 	// input handler instance
-	updi_input_handler #(.BITS_N(DATA_ADDR_BITS)) input_hdlr (
+	updi_input_handler #(
+		.BITS_N(DATA_ADDR_BITS),
+		.TIMEOUT_CLKS(TIMEOUT_CLKS)
+	) input_hdlr (
 		.clk(clk),
 		.rst(rst),
 		.wait_ack(waiting_for_ack),

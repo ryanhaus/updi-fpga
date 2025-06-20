@@ -92,7 +92,8 @@ module updi_programmer #(
 
 	parameter RX_OUT_FIFO_DEPTH = 16,
 
-	parameter DELAY_N_CLKS = 100
+	parameter DELAY_N_CLKS = 100,
+	parameter TIMEOUT_CLKS = 100
 ) (
 	input clk,
 	input rst,
