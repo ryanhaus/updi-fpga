@@ -5,7 +5,7 @@
 
 #include "updi_phy.hpp"
 
-#define MAX_TIME_PS 100000
+#define MAX_TIME_PS 1000000
 #define SERIAL_PORT "/dev/ttyUSB0"
 
 VerilatedContext* ctx;
