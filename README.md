@@ -29,7 +29,10 @@ For building/running individual tests, use `make test_NAME` and `make test_run_N
 TBD
 
 ## Potential Future Improvements
-- Clean up the `updi_programmer` module, it is very bloated right now.
+- Need to get working in hardware.
+- Make it easier to adapt for other microcontrollers which may have things mapped for different memory locations.
+- A smarter watchdog system that could perhaps just retry the last thing instead of fully resetting upon an error.
 - Maybe have the ROM be a separate module, or even make it a writeable form of memory.
 - AXI bus interface?
-- ROM verification
+- Verify flashed program after programming is finished.
+- Virtual UPDI-capable MCU for simulation (maybe overkill).
