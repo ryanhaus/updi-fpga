@@ -6,73 +6,49 @@ typedef enum {
 	UPDI_PROG_RESET_UPDI_DB_WAIT,
 
 	UPDI_PROG_READ_UPDI_STATUS_READ,
-	UPDI_PROG_READ_UPDI_STATUS_WAIT_DONE,
 	UPDI_PROG_READ_UPDI_STATUS_VERIFY,
 
 	UPDI_PROG_UNLOCK_CHIPERASE_SEND_KEY,
-	UPDI_PROG_UNLOCK_CHIPERASE_SEND_KEY_WAIT_DONE,
 	UPDI_PROG_UNLOCK_CHIPERASE_READ_STATUS,
-	UPDI_PROG_UNLOCK_CHIPERASE_READ_STATUS_WAIT_DONE,
 	UPDI_PROG_UNLOCK_CHIPERASE_VERIFY_STATUS,
 	UPDI_PROG_UNLOCK_CHIPERASE_RESET_DEVICE_START,
-	UPDI_PROG_UNLOCK_CHIPERASE_RESET_DEVICE_START_WAIT_DONE,
 	UPDI_PROG_UNLOCK_CHIPERASE_RESET_DEVICE_WAIT_DELAY,
 	UPDI_PROG_UNLOCK_CHIPERASE_RESET_DEVICE_CLEAR,
-	UPDI_PROG_UNLOCK_CHIPERASE_RESET_DEVICE_CLEAR_WAIT_DONE,
 	UPDI_PROG_UNLOCK_CHIPERASE_WAIT_FINISH_READ,
-	UPDI_PROG_UNLOCK_CHIPERASE_WAIT_FINISH_READ_WAIT_DONE,
 	UPDI_PROG_UNLOCK_CHIPERASE_WAIT_FINISH_READ_VERIFY,
 	UPDI_PROG_UNLOCK_CHIPERASE_WAIT_FINISH_WAIT_DELAY,
 
 	UPDI_PROG_UNLOCK_NVMPROG_SEND_KEY,
-	UPDI_PROG_UNLOCK_NVMPROG_SEND_KEY_WAIT_DONE,
 	UPDI_PROG_UNLOCK_NVMPROG_READ_STATUS,
-	UPDI_PROG_UNLOCK_NVMPROG_READ_STATUS_WAIT_DONE,
 	UPDI_PROG_UNLOCK_NVMPROG_VERIFY_STATUS,
 	UPDI_PROG_UNLOCK_NVMPROG_RESET_DEVICE_START,
-	UPDI_PROG_UNLOCK_NVMPROG_RESET_DEVICE_START_WAIT_DONE,
 	UPDI_PROG_UNLOCK_NVMPROG_RESET_DEVICE_WAIT_DELAY,
 	UPDI_PROG_UNLOCK_NVMPROG_RESET_DEVICE_CLEAR,
-	UPDI_PROG_UNLOCK_NVMPROG_RESET_DEVICE_CLEAR_WAIT_DONE,
 	UPDI_PROG_UNLOCK_NVMPROG_WAIT_FINISH_READ,
-	UPDI_PROG_UNLOCK_NVMPROG_WAIT_FINISH_READ_WAIT_DONE,
 	UPDI_PROG_UNLOCK_NVMPROG_WAIT_FINISH_READ_VERIFY,
 	UPDI_PROG_UNLOCK_NVMPROG_WAIT_FINISH_WAIT_DELAY,
 
 	UPDI_PROG_READ_DEVICE_ID_SET_RD_PTR,
-	UPDI_PROG_READ_DEVICE_ID_SET_RD_PTR_WAIT_DONE,
 	UPDI_PROG_READ_DEVICE_ID_SET_REPEAT,
-	UPDI_PROG_READ_DEVICE_ID_SET_REPEAT_WAIT_DONE,
 	UPDI_PROG_READ_DEVICE_ID_READ,
-	UPDI_PROG_READ_DEVICE_ID_READ_WAIT_DONE,
 	UPDI_PROG_READ_DEVICE_ID_GET_ID_BYTE0,
 	UPDI_PROG_READ_DEVICE_ID_GET_ID_BYTE1,
 	UPDI_PROG_READ_DEVICE_ID_GET_ID_BYTE2,
 
 	UPDI_PROG_PROGRAM_ROM_DECODER_START_SEGMENT,
-	UPDI_PROG_PROGRAM_ROM_DECODER_WAIT_DONE,
 	UPDI_PROG_PROGRAM_ROM_DECODER_VERIFY_SEGMENT,
 	UPDI_PROG_PROGRAM_ROM_NVM_CLEAR_WAIT_READY_READ,
-	UPDI_PROG_PROGRAM_ROM_NVM_CLEAR_WAIT_READY_READ_WAIT_DONE,
 	UPDI_PROG_PROGRAM_ROM_NVM_CLEAR_WAIT_READY_READ_VERIFY,
 	UPDI_PROG_PROGRAM_ROM_NVM_CLEAR,
-	UPDI_PROG_PROGRAM_ROM_NVM_CLEAR_WAIT_DONE,
 	UPDI_PROG_PROGRAM_ROM_NVM_WAIT_READY_READ,
-	UPDI_PROG_PROGRAM_ROM_NVM_WAIT_READY_READ_WAIT_DONE,
 	UPDI_PROG_PROGRAM_ROM_NVM_WAIT_READY_READ_VERIFY,
 	UPDI_PROG_PROGRAM_ROM_SET_WR_PTR,
-	UPDI_PROG_PROGRAM_ROM_SET_WR_PTR_WAIT_DONE,
 	UPDI_PROG_PROGRAM_ROM_SET_REPEAT,
-	UPDI_PROG_PROGRAM_ROM_SET_REPEAT_WAIT_DONE,
 	UPDI_PROG_PROGRAM_ROM_WRITE_DATA,
-	UPDI_PROG_PROGRAM_ROM_WRITE_DATA_WAIT_DONE,
 	UPDI_PROG_PROGRAM_ROM_WRITE_PAGE_BUFFER,
-	UPDI_PROG_PROGRAM_ROM_WRITE_PAGE_BUFFER_WAIT_DONE,
 	UPDI_PROG_PROGRAM_ROM_RESET_DEVICE_START,
-	UPDI_PROG_PROGRAM_ROM_RESET_DEVICE_START_WAIT_DONE,
 	UPDI_PROG_PROGRAM_ROM_RESET_DEVICE_WAIT_DELAY,
 	UPDI_PROG_PROGRAM_ROM_RESET_DEVICE_CLEAR,
-	UPDI_PROG_PROGRAM_ROM_RESET_DEVICE_CLEAR_WAIT_DONE,
 
 	UPDI_PROG_VERIFY_ROM
 } updi_programmer_state;
@@ -268,10 +244,6 @@ module updi_programmer #(
 				end
 
 				UPDI_PROG_READ_UPDI_STATUS_READ: begin
-					state <= UPDI_PROG_READ_UPDI_STATUS_WAIT_DONE;
-				end
-
-				UPDI_PROG_READ_UPDI_STATUS_WAIT_DONE: begin
 					if (interface_rx_done) begin
 						state <= UPDI_PROG_READ_UPDI_STATUS_VERIFY;
 					end
@@ -282,20 +254,12 @@ module updi_programmer #(
 				end
 
 				UPDI_PROG_UNLOCK_CHIPERASE_SEND_KEY: begin
-					state <= UPDI_PROG_UNLOCK_CHIPERASE_SEND_KEY_WAIT_DONE;
-				end
-				
-				UPDI_PROG_UNLOCK_CHIPERASE_SEND_KEY_WAIT_DONE: begin
-					if (interface_tx_ready) begin
+					if (interface_tx_done) begin
 						state <= UPDI_PROG_UNLOCK_CHIPERASE_READ_STATUS;
 					end
 				end
 
 				UPDI_PROG_UNLOCK_CHIPERASE_READ_STATUS: begin
-					state <= UPDI_PROG_UNLOCK_CHIPERASE_READ_STATUS_WAIT_DONE;
-				end
-
-				UPDI_PROG_UNLOCK_CHIPERASE_READ_STATUS_WAIT_DONE: begin
 					if (interface_rx_done) begin
 						state <= UPDI_PROG_UNLOCK_CHIPERASE_VERIFY_STATUS;
 					end
@@ -306,11 +270,7 @@ module updi_programmer #(
 				end
 
 				UPDI_PROG_UNLOCK_CHIPERASE_RESET_DEVICE_START: begin
-					state <= UPDI_PROG_UNLOCK_CHIPERASE_RESET_DEVICE_START_WAIT_DONE;
-				end
-
-				UPDI_PROG_UNLOCK_CHIPERASE_RESET_DEVICE_START_WAIT_DONE: begin
-					if (interface_tx_ready) begin
+					if (interface_tx_done) begin
 						state <= UPDI_PROG_UNLOCK_CHIPERASE_RESET_DEVICE_WAIT_DELAY;
 					end
 				end
@@ -322,20 +282,12 @@ module updi_programmer #(
 				end
 
 				UPDI_PROG_UNLOCK_CHIPERASE_RESET_DEVICE_CLEAR: begin
-					state <= UPDI_PROG_UNLOCK_CHIPERASE_RESET_DEVICE_CLEAR_WAIT_DONE;
-				end
-
-				UPDI_PROG_UNLOCK_CHIPERASE_RESET_DEVICE_CLEAR_WAIT_DONE: begin
-					if (interface_tx_ready) begin
+					if (interface_tx_done) begin
 						state <= UPDI_PROG_UNLOCK_CHIPERASE_WAIT_FINISH_READ;
 					end
 				end
 				
 				UPDI_PROG_UNLOCK_CHIPERASE_WAIT_FINISH_READ: begin
-					state <= UPDI_PROG_UNLOCK_CHIPERASE_WAIT_FINISH_READ_WAIT_DONE;
-				end
-				
-				UPDI_PROG_UNLOCK_CHIPERASE_WAIT_FINISH_READ_WAIT_DONE: begin
 					if (interface_rx_done) begin
 						state <= UPDI_PROG_UNLOCK_CHIPERASE_WAIT_FINISH_READ_VERIFY;
 					end
@@ -354,20 +306,12 @@ module updi_programmer #(
 				end
 
 				UPDI_PROG_UNLOCK_NVMPROG_SEND_KEY: begin
-					state <= UPDI_PROG_UNLOCK_NVMPROG_SEND_KEY_WAIT_DONE;
-				end
-
-				UPDI_PROG_UNLOCK_NVMPROG_SEND_KEY_WAIT_DONE: begin
-					if (interface_tx_ready) begin
+					if (interface_tx_done) begin
 						state <= UPDI_PROG_UNLOCK_NVMPROG_READ_STATUS;
 					end
 				end
 
 				UPDI_PROG_UNLOCK_NVMPROG_READ_STATUS: begin
-					state <= UPDI_PROG_UNLOCK_NVMPROG_READ_STATUS_WAIT_DONE;
-				end
-
-				UPDI_PROG_UNLOCK_NVMPROG_READ_STATUS_WAIT_DONE: begin
 					if (interface_rx_done) begin
 						state <= UPDI_PROG_UNLOCK_NVMPROG_VERIFY_STATUS;
 					end
@@ -378,11 +322,7 @@ module updi_programmer #(
 				end
 
 				UPDI_PROG_UNLOCK_NVMPROG_RESET_DEVICE_START: begin
-					state <= UPDI_PROG_UNLOCK_NVMPROG_RESET_DEVICE_START_WAIT_DONE;
-				end
-
-				UPDI_PROG_UNLOCK_NVMPROG_RESET_DEVICE_START_WAIT_DONE: begin
-					if (interface_tx_ready) begin
+					if (interface_tx_done) begin
 						state <= UPDI_PROG_UNLOCK_NVMPROG_RESET_DEVICE_WAIT_DELAY;
 					end
 				end
@@ -394,20 +334,12 @@ module updi_programmer #(
 				end
 				
 				UPDI_PROG_UNLOCK_NVMPROG_RESET_DEVICE_CLEAR: begin
-					state <= UPDI_PROG_UNLOCK_NVMPROG_RESET_DEVICE_CLEAR_WAIT_DONE;
-				end
-
-				UPDI_PROG_UNLOCK_NVMPROG_RESET_DEVICE_CLEAR_WAIT_DONE: begin
-					if (interface_tx_ready) begin
+					if (interface_tx_done) begin
 						state <= UPDI_PROG_UNLOCK_NVMPROG_WAIT_FINISH_READ;
 					end
 				end
 				
 				UPDI_PROG_UNLOCK_NVMPROG_WAIT_FINISH_READ: begin
-					state <= UPDI_PROG_UNLOCK_NVMPROG_WAIT_FINISH_READ_WAIT_DONE;
-				end
-				
-				UPDI_PROG_UNLOCK_NVMPROG_WAIT_FINISH_READ_WAIT_DONE: begin
 					if (interface_rx_done) begin
 						state <= UPDI_PROG_UNLOCK_NVMPROG_WAIT_FINISH_READ_VERIFY;
 					end
@@ -426,30 +358,18 @@ module updi_programmer #(
 				end
 				
 				UPDI_PROG_READ_DEVICE_ID_SET_RD_PTR: begin
-					state <= UPDI_PROG_READ_DEVICE_ID_SET_RD_PTR_WAIT_DONE;
-				end
-
-				UPDI_PROG_READ_DEVICE_ID_SET_RD_PTR_WAIT_DONE: begin
-					if (interface_tx_ready) begin
+					if (interface_tx_done) begin
 						state <= UPDI_PROG_READ_DEVICE_ID_SET_REPEAT;
 					end
 				end
 				
 				UPDI_PROG_READ_DEVICE_ID_SET_REPEAT: begin
-					state <= UPDI_PROG_READ_DEVICE_ID_SET_REPEAT_WAIT_DONE;
-				end
-
-				UPDI_PROG_READ_DEVICE_ID_SET_REPEAT_WAIT_DONE: begin
-					if (interface_tx_ready) begin
+					if (interface_tx_done) begin
 						state <= UPDI_PROG_READ_DEVICE_ID_READ;
 					end
 				end
 				
 				UPDI_PROG_READ_DEVICE_ID_READ: begin
-					state <= UPDI_PROG_READ_DEVICE_ID_READ_WAIT_DONE;
-				end
-
-				UPDI_PROG_READ_DEVICE_ID_READ_WAIT_DONE: begin
 					if (interface_rx_done) begin
 						state <= UPDI_PROG_READ_DEVICE_ID_GET_ID_BYTE0;
 					end
@@ -468,11 +388,7 @@ module updi_programmer #(
 				end
 
 				UPDI_PROG_PROGRAM_ROM_DECODER_START_SEGMENT: begin
-					state <= UPDI_PROG_PROGRAM_ROM_DECODER_WAIT_DONE;
-				end
-
-				UPDI_PROG_PROGRAM_ROM_DECODER_WAIT_DONE: begin
-					if (program_ready) begin
+					if (program_done) begin
 						state <= UPDI_PROG_PROGRAM_ROM_DECODER_VERIFY_SEGMENT;
 					end
 				end
@@ -484,11 +400,7 @@ module updi_programmer #(
 				end
 
 				UPDI_PROG_PROGRAM_ROM_NVM_CLEAR_WAIT_READY_READ: begin
-					state <= UPDI_PROG_PROGRAM_ROM_NVM_CLEAR_WAIT_READY_READ_WAIT_DONE;
-				end
-
-				UPDI_PROG_PROGRAM_ROM_NVM_CLEAR_WAIT_READY_READ_WAIT_DONE: begin
-					if (interface_tx_ready) begin
+					if (interface_tx_done) begin
 						state <= UPDI_PROG_PROGRAM_ROM_NVM_CLEAR_WAIT_READY_READ_VERIFY;
 					end
 				end
@@ -500,21 +412,13 @@ module updi_programmer #(
 				end
 				
 				UPDI_PROG_PROGRAM_ROM_NVM_CLEAR: begin
-					state <= UPDI_PROG_PROGRAM_ROM_NVM_CLEAR_WAIT_DONE;
-				end
-				
-				UPDI_PROG_PROGRAM_ROM_NVM_CLEAR_WAIT_DONE: begin
-					if (interface_tx_ready) begin
+					if (interface_tx_done) begin
 						state <= UPDI_PROG_PROGRAM_ROM_NVM_WAIT_READY_READ;
 					end
 				end
 
 				UPDI_PROG_PROGRAM_ROM_NVM_WAIT_READY_READ: begin
-					state <= UPDI_PROG_PROGRAM_ROM_NVM_WAIT_READY_READ_WAIT_DONE;
-				end
-
-				UPDI_PROG_PROGRAM_ROM_NVM_WAIT_READY_READ_WAIT_DONE: begin
-					if (interface_tx_ready) begin
+					if (interface_tx_done) begin
 						state <= UPDI_PROG_PROGRAM_ROM_NVM_WAIT_READY_READ_VERIFY;
 					end
 				end
@@ -526,51 +430,31 @@ module updi_programmer #(
 				end
 
 				UPDI_PROG_PROGRAM_ROM_SET_WR_PTR: begin
-					state <= UPDI_PROG_PROGRAM_ROM_SET_WR_PTR_WAIT_DONE;
-				end
-
-				UPDI_PROG_PROGRAM_ROM_SET_WR_PTR_WAIT_DONE: begin
-					if (interface_tx_ready) begin
+					if (interface_tx_done) begin
 						state <= UPDI_PROG_PROGRAM_ROM_SET_REPEAT;
 					end
 				end
 
 				UPDI_PROG_PROGRAM_ROM_SET_REPEAT: begin
-					state <= UPDI_PROG_PROGRAM_ROM_SET_REPEAT_WAIT_DONE;
-				end
-
-				UPDI_PROG_PROGRAM_ROM_SET_REPEAT_WAIT_DONE: begin
-					if (interface_tx_ready) begin
+					if (interface_tx_done) begin
 						state <= UPDI_PROG_PROGRAM_ROM_WRITE_DATA;
 					end
 				end
 
 				UPDI_PROG_PROGRAM_ROM_WRITE_DATA: begin
-					state <= UPDI_PROG_PROGRAM_ROM_WRITE_DATA_WAIT_DONE;
-				end
-
-				UPDI_PROG_PROGRAM_ROM_WRITE_DATA_WAIT_DONE: begin
-					if (interface_tx_ready) begin
+					if (interface_tx_done) begin
 						state <= UPDI_PROG_PROGRAM_ROM_WRITE_PAGE_BUFFER;
 					end
 				end
 				
 				UPDI_PROG_PROGRAM_ROM_WRITE_PAGE_BUFFER: begin
-					state <= UPDI_PROG_PROGRAM_ROM_WRITE_PAGE_BUFFER_WAIT_DONE;
-				end
-
-				UPDI_PROG_PROGRAM_ROM_WRITE_PAGE_BUFFER_WAIT_DONE: begin
-					if (interface_tx_ready) begin
+					if (interface_tx_done) begin
 						state <= UPDI_PROG_PROGRAM_ROM_DECODER_START_SEGMENT;
 					end
 				end
 
 				UPDI_PROG_PROGRAM_ROM_RESET_DEVICE_START: begin
-					state <= UPDI_PROG_PROGRAM_ROM_RESET_DEVICE_START_WAIT_DONE;
-				end
-
-				UPDI_PROG_PROGRAM_ROM_RESET_DEVICE_START_WAIT_DONE: begin
-					if (interface_tx_ready) begin
+					if (interface_tx_done) begin
 						state <= UPDI_PROG_PROGRAM_ROM_RESET_DEVICE_WAIT_DELAY;
 					end
 				end
@@ -582,11 +466,7 @@ module updi_programmer #(
 				end
 				
 				UPDI_PROG_PROGRAM_ROM_RESET_DEVICE_CLEAR: begin
-					state <= UPDI_PROG_PROGRAM_ROM_RESET_DEVICE_CLEAR_WAIT_DONE;
-				end
-
-				UPDI_PROG_PROGRAM_ROM_RESET_DEVICE_CLEAR_WAIT_DONE: begin
-					if (interface_tx_ready) begin
+					if (interface_tx_done) begin
 						state <= UPDI_PROG_VERIFY_ROM;
 					end
 				end
@@ -637,25 +517,26 @@ module updi_programmer #(
 			end
 
 			UPDI_PROG_RESET_UPDI_DB_START: begin
-				double_break_start = 'b1;
+				if (first_clock) begin
+					double_break_start = 'b1;
+				end
 			end
 
 			UPDI_PROG_READ_UPDI_STATUS_READ: begin
-				// send instruction to read STATUSA register (0x00)
-				instr_converter_en = 'b1;
-				instruction = UPDI_LDCS;
-				instr_cs_addr = 'h0;
+				if (first_clock) begin
+					// send instruction to read STATUSA register (0x00)
+					instr_converter_en = 'b1;
+					instruction = UPDI_LDCS;
+					instr_cs_addr = 'h0;
 
-				interface_tx_start = 'b1;
-				
-				// init data read of 1 byte
-				interface_rx_n_bytes = 'd1;
-				interface_rx_start = 'b1;
-			end
-
-			UPDI_PROG_READ_UPDI_STATUS_WAIT_DONE: begin
-				// if there is data in the FIFO, try to read it next clk cycle
-				if (!out_rx_fifo_empty) begin
+					interface_tx_start = 'b1;
+					
+					// init data read of 1 byte
+					interface_rx_n_bytes = 'd1;
+					interface_rx_start = 'b1;
+				end
+				else if (!out_rx_fifo_empty) begin
+					// if there is data in the FIFO, try to read it next clk cycle
 					out_rx_fifo_rd_en = 'b1;
 				end
 			end
@@ -670,31 +551,32 @@ module updi_programmer #(
 			end
 
 			UPDI_PROG_UNLOCK_CHIPERASE_SEND_KEY: begin
-				instr_converter_en = 'b1;
-				instruction = UPDI_KEY;
+				if (first_clock) begin
+					instr_converter_en = 'b1;
+					instruction = UPDI_KEY;
 
-				load_key(`KEY_CHIPERASE, instr_data[0:7]);
-				instr_data_len = 'd8;
+					load_key(`KEY_CHIPERASE, instr_data[0:7]);
+					instr_data_len = 'd8;
 
-				interface_tx_start = 'b1;
+					interface_tx_start = 'b1;
+				end
 			end
 
 			UPDI_PROG_UNLOCK_CHIPERASE_READ_STATUS: begin
-				// send instruction to read ASI_KEY_STATUS register (0x07)
-				instr_converter_en = 'b1;
-				instruction = UPDI_LDCS;
-				instr_cs_addr = 'h7;
+				if (first_clock) begin
+					// send instruction to read ASI_KEY_STATUS register (0x07)
+					instr_converter_en = 'b1;
+					instruction = UPDI_LDCS;
+					instr_cs_addr = 'h7;
 
-				interface_tx_start = 'b1;
+					interface_tx_start = 'b1;
 
-				// init data read of 1 byte
-				interface_rx_n_bytes = 'd1;
-				interface_rx_start = 'b1;
-			end
-
-			UPDI_PROG_UNLOCK_CHIPERASE_READ_STATUS_WAIT_DONE: begin
-				// if there is data in the FIFO, try to read it next clk cycle
-				if (!out_rx_fifo_empty) begin
+					// init data read of 1 byte
+					interface_rx_n_bytes = 'd1;
+					interface_rx_start = 'b1;
+				end
+				else if (!out_rx_fifo_empty) begin
+					// if there is data in the FIFO, try to read it next clk cycle
 					out_rx_fifo_rd_en = 'b1;
 				end
 			end
@@ -709,48 +591,51 @@ module updi_programmer #(
 			end
 
 			UPDI_PROG_UNLOCK_CHIPERASE_RESET_DEVICE_START: begin
-				// store the system reset signature (0x59) into ASI_RESET_REQ (0x08)
-				instr_converter_en = 'b1;
-				instruction = UPDI_STCS;
-				instr_cs_addr = 'h8;
+				if (first_clock) begin
+					// store the system reset signature (0x59) into ASI_RESET_REQ (0x08)
+					instr_converter_en = 'b1;
+					instruction = UPDI_STCS;
+					instr_cs_addr = 'h8;
 
-				instr_data[0] = 'h59;
-				instr_data_len = 'd1;
+					instr_data[0] = 'h59;
+					instr_data_len = 'd1;
 
-				interface_tx_start = 'b1;
+					interface_tx_start = 'b1;
 
-				// also, start the delay
-				delay_start = 'b1;
+					// also, start the delay
+					delay_start = 'b1;
+				end
 			end
 
 			UPDI_PROG_UNLOCK_CHIPERASE_RESET_DEVICE_CLEAR: begin
-				// clear ASI_RESET_REQ (0x08)
-				instr_converter_en = 'b1;
-				instruction = UPDI_STCS;
-				instr_cs_addr = 'h8;
+				if (first_clock) begin
+					// clear ASI_RESET_REQ (0x08)
+					instr_converter_en = 'b1;
+					instruction = UPDI_STCS;
+					instr_cs_addr = 'h8;
 
-				instr_data[0] = 'h00;
-				instr_data_len = 'd1;
+					instr_data[0] = 'h00;
+					instr_data_len = 'd1;
 
-				interface_tx_start = 'b1;
+					interface_tx_start = 'b1;
+				end
 			end
 
 			UPDI_PROG_UNLOCK_CHIPERASE_WAIT_FINISH_READ: begin
-				// read ASI_SYS_STATUS (0x0B)
-				instr_converter_en = 'b1;
-				instruction = UPDI_LDCS;
-				instr_cs_addr = 'hB;
+				if (first_clock) begin
+					// read ASI_SYS_STATUS (0x0B)
+					instr_converter_en = 'b1;
+					instruction = UPDI_LDCS;
+					instr_cs_addr = 'hB;
 
-				interface_tx_start = 'b1;
+					interface_tx_start = 'b1;
 
-				// init data read of 1 byte
-				interface_rx_n_bytes = 'd1;
-				interface_rx_start = 'b1;
-			end
-
-			UPDI_PROG_UNLOCK_CHIPERASE_WAIT_FINISH_READ_WAIT_DONE: begin
-				// if there is data in the FIFO, try to read it next clk cycle
-				if (!out_rx_fifo_empty) begin
+					// init data read of 1 byte
+					interface_rx_n_bytes = 'd1;
+					interface_rx_start = 'b1;
+				end
+				else if (!out_rx_fifo_empty) begin
+					// if there is data in the FIFO, try to read it next clk cycle
 					out_rx_fifo_rd_en = 'b1;
 				end
 			end
@@ -768,31 +653,32 @@ module updi_programmer #(
 			end
 
 			UPDI_PROG_UNLOCK_NVMPROG_SEND_KEY: begin
-				instr_converter_en = 'b1;
-				instruction = UPDI_KEY;
+				if (first_clock) begin
+					instr_converter_en = 'b1;
+					instruction = UPDI_KEY;
 
-				load_key(`KEY_NVMPROG, instr_data[0:7]);
-				instr_data_len = 'd8;
+					load_key(`KEY_NVMPROG, instr_data[0:7]);
+					instr_data_len = 'd8;
 
-				interface_tx_start = 'b1;
+					interface_tx_start = 'b1;
+				end
 			end
 
 			UPDI_PROG_UNLOCK_NVMPROG_READ_STATUS: begin
-				// send instruction to read ASI_KEY_STATUS register (0x07)
-				instr_converter_en = 'b1;
-				instruction = UPDI_LDCS;
-				instr_cs_addr = 'h7;
+				if (first_clock) begin
+					// send instruction to read ASI_KEY_STATUS register (0x07)
+					instr_converter_en = 'b1;
+					instruction = UPDI_LDCS;
+					instr_cs_addr = 'h7;
 
-				interface_tx_start = 'b1;
+					interface_tx_start = 'b1;
 
-				// init data read of 1 byte
-				interface_rx_n_bytes = 'd1;
-				interface_rx_start = 'b1;
-			end
-
-			UPDI_PROG_UNLOCK_NVMPROG_READ_STATUS_WAIT_DONE: begin
-				// if there is data in the FIFO, try to read it next clk cycle
-				if (!out_rx_fifo_empty) begin
+					// init data read of 1 byte
+					interface_rx_n_bytes = 'd1;
+					interface_rx_start = 'b1;
+				end
+				else if (!out_rx_fifo_empty) begin
+					// if there is data in the FIFO, try to read it next clk cycle
 					out_rx_fifo_rd_en = 'b1;
 				end
 			end
@@ -807,48 +693,51 @@ module updi_programmer #(
 			end
 
 			UPDI_PROG_UNLOCK_NVMPROG_RESET_DEVICE_START: begin
-				// store the system reset signature (0x59) into ASI_RESET_REQ (0x08)
-				instr_converter_en = 'b1;
-				instruction = UPDI_STCS;
-				instr_cs_addr = 'h8;
+				if (first_clock) begin
+					// store the system reset signature (0x59) into ASI_RESET_REQ (0x08)
+					instr_converter_en = 'b1;
+					instruction = UPDI_STCS;
+					instr_cs_addr = 'h8;
 
-				instr_data[0] = 'h59;
-				instr_data_len = 'd1;
+					instr_data[0] = 'h59;
+					instr_data_len = 'd1;
 
-				interface_tx_start = 'b1;
+					interface_tx_start = 'b1;
 
-				// also, start the delay
-				delay_start = 'b1;
+					// also, start the delay
+					delay_start = 'b1;
+				end
 			end
 
 			UPDI_PROG_UNLOCK_NVMPROG_RESET_DEVICE_CLEAR: begin
-				// clear ASI_RESET_REQ (0x08)
-				instr_converter_en = 'b1;
-				instruction = UPDI_STCS;
-				instr_cs_addr = 'h8;
+				if (first_clock) begin
+					// clear ASI_RESET_REQ (0x08)
+					instr_converter_en = 'b1;
+					instruction = UPDI_STCS;
+					instr_cs_addr = 'h8;
 
-				instr_data[0] = 'h00;
-				instr_data_len = 'd1;
+					instr_data[0] = 'h00;
+					instr_data_len = 'd1;
 
-				interface_tx_start = 'b1;
+					interface_tx_start = 'b1;
+				end
 			end
 
 			UPDI_PROG_UNLOCK_NVMPROG_WAIT_FINISH_READ: begin
-				// read ASI_SYS_STATUS (0x0B)
-				instr_converter_en = 'b1;
-				instruction = UPDI_LDCS;
-				instr_cs_addr = 'hB;
+				if (first_clock) begin
+					// read ASI_SYS_STATUS (0x0B)
+					instr_converter_en = 'b1;
+					instruction = UPDI_LDCS;
+					instr_cs_addr = 'hB;
 
-				interface_tx_start = 'b1;
-				
-				// init data read of 1 byte
-				interface_rx_n_bytes = 'd1;
-				interface_rx_start = 'b1;
-			end
-
-			UPDI_PROG_UNLOCK_NVMPROG_WAIT_FINISH_READ_WAIT_DONE: begin
-				// if there is data in the FIFO, try to read it next clk cycle
-				if (!out_rx_fifo_empty) begin
+					interface_tx_start = 'b1;
+					
+					// init data read of 1 byte
+					interface_rx_n_bytes = 'd1;
+					interface_rx_start = 'b1;
+				end
+				else if (!out_rx_fifo_empty) begin
+					// if there is data in the FIFO, try to read it next clk cycle
 					out_rx_fifo_rd_en = 'b1;
 				end
 			end
@@ -866,49 +755,52 @@ module updi_programmer #(
 			end
 			
 			UPDI_PROG_READ_DEVICE_ID_SET_RD_PTR: begin
-				// set the read pointer to 0x1100 (signatures base address)
-				instr_converter_en = 'b1;
-				instruction = UPDI_ST;
-				instr_ptr = 'b10;
-				instr_size_a = 'b01;
+				if (first_clock) begin
+					// set the read pointer to 0x1100 (signatures base address)
+					instr_converter_en = 'b1;
+					instruction = UPDI_ST;
+					instr_ptr = 'b10;
+					instr_size_a = 'b01;
 
-				instr_data[0] = 'h00;
-				instr_data[1] = 'h11;
-				instr_data_len = 'd2;
+					instr_data[0] = 'h00;
+					instr_data[1] = 'h11;
+					instr_data_len = 'd2;
 
-				instr_wait_ack_after[1] = 'b1;
+					instr_wait_ack_after[1] = 'b1;
 
-				interface_tx_start = 'b1;
+					interface_tx_start = 'b1;
+				end
 			end
 
 			UPDI_PROG_READ_DEVICE_ID_SET_REPEAT: begin
-				// want to repeat 2 times to read 3 bytes
-				instr_converter_en = 'b1;
-				instruction = UPDI_REPEAT;
+				if (first_clock) begin
+					// want to repeat 2 times to read 3 bytes
+					instr_converter_en = 'b1;
+					instruction = UPDI_REPEAT;
 
-				instr_data[0] = 'd2;
-				instr_data_len = 'd1;
+					instr_data[0] = 'd2;
+					instr_data_len = 'd1;
 
-				interface_tx_start = 'b1;
+					interface_tx_start = 'b1;
+				end
 			end
 
 			UPDI_PROG_READ_DEVICE_ID_READ: begin
-				// send LD command to load from (*ptr++)
-				instr_converter_en = 'b1;
-				instruction = UPDI_LD;
-				instr_ptr = 'b01;
-				instr_size_a = 'b00;
+				if (first_clock) begin
+					// send LD command to load from (*ptr++)
+					instr_converter_en = 'b1;
+					instruction = UPDI_LD;
+					instr_ptr = 'b01;
+					instr_size_a = 'b00;
 
-				interface_tx_start = 'b1;
-				
-				// init data read of 3 byte
-				interface_rx_n_bytes = 'd3;
-				interface_rx_start = 'b1;
-			end
-
-			UPDI_PROG_READ_DEVICE_ID_READ_WAIT_DONE: begin
-				// if there is data in the FIFO, try to read it next clk cycle
-				if (interface_rx_ready) begin
+					interface_tx_start = 'b1;
+					
+					// init data read of 3 byte
+					interface_rx_n_bytes = 'd3;
+					interface_rx_start = 'b1;
+				end
+				else if (interface_rx_ready) begin
+					// if there is data in the FIFO, try to read it next clk cycle
 					out_rx_fifo_rd_en = 'b1;
 				end
 			end
@@ -932,7 +824,9 @@ module updi_programmer #(
 			end
 
 			UPDI_PROG_PROGRAM_ROM_DECODER_START_SEGMENT: begin
-				program_start = 'b1;
+				if (first_clock) begin
+					program_start = 'b1;
+				end
 			end
 
 			UPDI_PROG_PROGRAM_ROM_DECODER_VERIFY_SEGMENT: begin
@@ -942,26 +836,25 @@ module updi_programmer #(
 			end
 
 			UPDI_PROG_PROGRAM_ROM_NVM_CLEAR_WAIT_READY_READ: begin
-				// LDS from 0x1002 (NVM STATUS register)
-				instr_converter_en = 'b1;
-				instruction = UPDI_LDS;
-				instr_size_a = 'b01; // word address
-				instr_size_b = 'b00; // byte data
+				if (first_clock) begin
+					// LDS from 0x1002 (NVM STATUS register)
+					instr_converter_en = 'b1;
+					instruction = UPDI_LDS;
+					instr_size_a = 'b01; // word address
+					instr_size_b = 'b00; // byte data
 
-				instr_data[0] = 'h02;
-				instr_data[1] = 'h10;
-				instr_data_len = 'd2;
+					instr_data[0] = 'h02;
+					instr_data[1] = 'h10;
+					instr_data_len = 'd2;
 
-				interface_tx_start = 'b1;
+					interface_tx_start = 'b1;
 
-				// init data read of 1 byte
-				interface_rx_n_bytes = 'd1;
-				interface_rx_start = 'b1;
-			end
-
-			UPDI_PROG_PROGRAM_ROM_NVM_CLEAR_WAIT_READY_READ_WAIT_DONE: begin
-				// if there is data in the FIFO, try to read it next clk cycle
-				if (!out_rx_fifo_empty) begin
+					// init data read of 1 byte
+					interface_rx_n_bytes = 'd1;
+					interface_rx_start = 'b1;
+				end
+				else if (!out_rx_fifo_empty) begin
+					// if there is data in the FIFO, try to read it next clk cycle
 					out_rx_fifo_rd_en = 'b1;
 				end
 			end
@@ -974,43 +867,44 @@ module updi_programmer #(
 			end
 
 			UPDI_PROG_PROGRAM_ROM_NVM_CLEAR: begin
-				// clear write buffer by writing PBC opcode (0x04) to the NVM
-				// CTRLA register (addr 0x1000)
-				instr_converter_en = 'b1;
-				instruction = UPDI_STS;
-				instr_size_a = 'b01; // word address
-				instr_size_b = 'b00; // byte data
+				if (first_clock) begin
+					// clear write buffer by writing PBC opcode (0x04) to the NVM
+					// CTRLA register (addr 0x1000)
+					instr_converter_en = 'b1;
+					instruction = UPDI_STS;
+					instr_size_a = 'b01; // word address
+					instr_size_b = 'b00; // byte data
 
-				instr_data[0] = 'h00;
-				instr_data[1] = 'h10;
-				instr_data[2] = 'h04;
-				instr_data_len = 'd3;
-				instr_wait_ack_after[1] = 'b1;
+					instr_data[0] = 'h00;
+					instr_data[1] = 'h10;
+					instr_data[2] = 'h04;
+					instr_data_len = 'd3;
+					instr_wait_ack_after[1] = 'b1;
 
-				interface_tx_start = 'b1;
+					interface_tx_start = 'b1;
+				end
 			end
 			
 			UPDI_PROG_PROGRAM_ROM_NVM_WAIT_READY_READ: begin
-				// LDS from 0x1002 (NVM STATUS register)
-				instr_converter_en = 'b1;
-				instruction = UPDI_LDS;
-				instr_size_a = 'b01; // word address
-				instr_size_b = 'b00; // byte data
+				if (first_clock) begin
+					// LDS from 0x1002 (NVM STATUS register)
+					instr_converter_en = 'b1;
+					instruction = UPDI_LDS;
+					instr_size_a = 'b01; // word address
+					instr_size_b = 'b00; // byte data
 
-				instr_data[0] = 'h02;
-				instr_data[1] = 'h10;
-				instr_data_len = 'd2;
+					instr_data[0] = 'h02;
+					instr_data[1] = 'h10;
+					instr_data_len = 'd2;
 
-				interface_tx_start = 'b1;
+					interface_tx_start = 'b1;
 
-				// init data read of 1 byte
-				interface_rx_n_bytes = 'd1;
-				interface_rx_start = 'b1;
-			end
-
-			UPDI_PROG_PROGRAM_ROM_NVM_WAIT_READY_READ_WAIT_DONE: begin
-				// if there is data in the FIFO, try to read it next clk cycle
+					// init data read of 1 byte
+					interface_rx_n_bytes = 'd1;
+					interface_rx_start = 'b1;
+				end
 				if (!out_rx_fifo_empty) begin
+					// if there is data in the FIFO, try to read it next clk cycle
 					out_rx_fifo_rd_en = 'b1;
 				end
 			end
@@ -1023,104 +917,108 @@ module updi_programmer #(
 			end
 
 			UPDI_PROG_PROGRAM_ROM_SET_WR_PTR: begin
-				// set the write pointer by using ST
-				instr_converter_en = 'b1;
-				instruction = UPDI_ST;
-				instr_ptr = 'b10; // writing to the pointer value
-				instr_size_a = 'b01; // word address
+				if (first_clock) begin
+					// set the write pointer by using ST
+					instr_converter_en = 'b1;
+					instruction = UPDI_ST;
+					instr_ptr = 'b10; // writing to the pointer value
+					instr_size_a = 'b01; // word address
 
-				instr_data[0] = program_block_address[7:0];
-				instr_data[1] = program_block_address[15:8];
-				instr_data_len = 'd2;
+					instr_data[0] = program_block_address[7:0];
+					instr_data[1] = program_block_address[15:8];
+					instr_data_len = 'd2;
 
-				interface_tx_start = 'b1;
+					interface_tx_start = 'b1;
+				end
 			end
 
 			UPDI_PROG_PROGRAM_ROM_SET_REPEAT: begin
-				// use REPEAT to write multiple bytes
-				instr_converter_en = 'b1;
-				instruction = UPDI_REPEAT;
+				if (first_clock) begin
+					// use REPEAT to write multiple bytes
+					instr_converter_en = 'b1;
+					instruction = UPDI_REPEAT;
 
-				// n/2 - 1 repeats = n/2 words written = n bytes written (rounded up)
-				instr_data[0] = (program_block_length >> 1) - 'b1;
-				instr_data_len = 'd1;
+					// n/2 - 1 repeats = n/2 words written = n bytes written (rounded up)
+					instr_data[0] = (program_block_length >> 1) - 'b1;
+					instr_data_len = 'd1;
 
-				interface_tx_start = 'b1;
+					interface_tx_start = 'b1;
+				end
 			end
 
 			UPDI_PROG_PROGRAM_ROM_WRITE_DATA: begin
-				// use ST to write all bytes
-				instr_converter_en = 'b1;
-				instruction = UPDI_ST;
-				instr_ptr = 'b01; // *(ptr++)
-				instr_size_a = 'b01; // write as words
+				if (first_clock) begin
+					// use ST to write all bytes
+					instr_converter_en = 'b1;
+					instruction = UPDI_ST;
+					instr_ptr = 'b01; // *(ptr++)
+					instr_size_a = 'b01; // write as words
 
-				/*
-				// swap endianness for all words
-				for (integer i = 0; i < 64; i = i + 2) begin
-					instr_data[i] = program_block_data[i + 1];
-					instr_data[i + 1] = program_block_data[i];
+					instr_data = program_block_data;
+					instr_data_len = program_block_length[DATA_ADDR_BITS:0];
+
+					// since the values written are words, wait for ACK after
+					// every second byte, starting at byte 2 (index 1)
+					for (integer i = 1; i < program_block_length; i = i + 2) begin
+						instr_wait_ack_after[i] = 'b1;
+					end
+
+					interface_tx_start = 'b1;
 				end
-				*/
-
-				instr_data = program_block_data;
-				instr_data_len = program_block_length[DATA_ADDR_BITS:0];
-
-				// since the values written are words, wait for ACK after
-				// every second byte, starting at byte 2 (index 1)
-				for (integer i = 1; i < program_block_length; i = i + 2) begin
-					instr_wait_ack_after[i] = 'b1;
-				end
-
-				interface_tx_start = 'b1;
 			end
 
 			UPDI_PROG_PROGRAM_ROM_WRITE_PAGE_BUFFER: begin
-				// write the page buffer to flash by writing the WP opcode
-				// (0x1) to the NVM CTRLA register (0x1000)
-				instr_converter_en = 'b1;
-				instruction = UPDI_STS;
-				instr_size_a = 'b01; // word address
-				instr_size_b = 'b00; // byte data
+				if (first_clock) begin
+					// write the page buffer to flash by writing the WP opcode
+					// (0x1) to the NVM CTRLA register (0x1000)
+					instr_converter_en = 'b1;
+					instruction = UPDI_STS;
+					instr_size_a = 'b01; // word address
+					instr_size_b = 'b00; // byte data
 
-				instr_data[0] = 'h00;
-				instr_data[1] = 'h10;
-				instr_data[2] = 'h01;
-				instr_data_len = 'd3;
-				instr_wait_ack_after[1] = 'b1;
+					instr_data[0] = 'h00;
+					instr_data[1] = 'h10;
+					instr_data[2] = 'h01;
+					instr_data_len = 'd3;
+					instr_wait_ack_after[1] = 'b1;
 
-				interface_tx_start = 'b1;
+					interface_tx_start = 'b1;
+				end
 			end
 
 			UPDI_PROG_PROGRAM_ROM_RESET_DEVICE_START: begin
-				// store the system reset signature (0x59) into ASI_RESET_REQ (0x08)
-				instr_converter_en = 'b1;
-				instruction = UPDI_STCS;
-				instr_cs_addr = 'h8;
+				if (first_clock) begin
+					// store the system reset signature (0x59) into ASI_RESET_REQ (0x08)
+					instr_converter_en = 'b1;
+					instruction = UPDI_STCS;
+					instr_cs_addr = 'h8;
 
-				instr_data[0] = 'h59;
-				instr_data_len = 'd1;
+					instr_data[0] = 'h59;
+					instr_data_len = 'd1;
 
-				interface_tx_start = 'b1;
+					interface_tx_start = 'b1;
 
-				// also, start the delay
-				delay_start = 'b1;
+					// also, start the delay
+					delay_start = 'b1;
+				end
 			end
 
 			UPDI_PROG_PROGRAM_ROM_RESET_DEVICE_CLEAR: begin
-				// clear ASI_RESET_REQ (0x08)
-				instr_converter_en = 'b1;
-				instruction = UPDI_STCS;
-				instr_cs_addr = 'h8;
+				if (first_clock) begin
+					// clear ASI_RESET_REQ (0x08)
+					instr_converter_en = 'b1;
+					instruction = UPDI_STCS;
+					instr_cs_addr = 'h8;
 
-				instr_data[0] = 'h00;
-				instr_data_len = 'd1;
+					instr_data[0] = 'h00;
+					instr_data_len = 'd1;
 
-				interface_tx_start = 'b1;
+					interface_tx_start = 'b1;
+				end
 			end
 			
 			UPDI_PROG_VERIFY_ROM: begin
-
+				// TODO
 			end
 		endcase
 	end
