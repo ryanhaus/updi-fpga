@@ -110,7 +110,8 @@ module top (
 		.uart_rx_fifo_empty(uart_rx_fifo_empty),
 		.double_break_start(double_break_start),
 		.double_break_busy(double_break_busy),
-		.double_break_done(double_break_done)
+		.double_break_done(double_break_done),
+		.updi(updi)
 	);
 
 endmodule
