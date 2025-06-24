@@ -30,6 +30,8 @@ module updi_double_break #(
 			done <= 'b0;
 		end
 		else begin
+			done <= 'b0;
+
 			if (busy) begin
 				if (counter == 'b0) begin
 					// counter done, move to next pulse
