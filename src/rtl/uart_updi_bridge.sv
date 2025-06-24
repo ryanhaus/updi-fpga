@@ -22,13 +22,13 @@ module uart_updi_bridge (
 			UPDI_BRIDGE_MODE_IDLE: begin
 				updi_out = 'b1;
 				updi_en = 'b1;
-				rx = 'b0;
+				rx = 'b1;
 			end
 
 			UPDI_BRIDGE_MODE_TX: begin
 				updi_out = tx;
 				updi_en = 'b1;
-				rx = 'b0;
+				rx = 'b1;
 			end
 
 			UPDI_BRIDGE_MODE_RX: begin
@@ -40,7 +40,7 @@ module uart_updi_bridge (
 			UPDI_BRIDGE_MODE_BREAK: begin
 				updi_out = 'b0;
 				updi_en = 'b1;
-				rx = 'b0;
+				rx = 'b1;
 			end
 		endcase
 	end
