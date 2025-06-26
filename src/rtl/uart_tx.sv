@@ -90,10 +90,10 @@ module uart_tx #(
 
 				UART_PARITY: begin
 					if (uart_clk == 'b1) begin
-						// handle parity, parity_result is always odd parity
+						// handle parity, parity_result is always even parity
 						case (PARITY_BIT)
-							"even": tx <= ~parity_result;
-							"odd": tx <= parity_result;
+							"even": tx <= parity_result;
+							"odd": tx <= ~parity_result;
 						endcase
 
 						// for just 1 stop bit, simply going back to idle is

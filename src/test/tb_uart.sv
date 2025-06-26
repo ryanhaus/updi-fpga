@@ -11,9 +11,8 @@ module tb_uart();
 
 	// generate parity for verification
 	logic [7:0] parity_data;
-	logic parity_result;
-	wire parity = ~parity_result; // inverted to make even parity
-	parity parity_inst (parity_data, parity_result);
+	logic parity;
+	parity parity_inst (parity_data, parity);
 
 	// reverse tx_data bit order for verification
 	wire [dut.DATA_BITS-1 : 0] tx_data_rev;

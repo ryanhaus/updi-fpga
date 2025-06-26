@@ -39,8 +39,8 @@ module uart_rx #(
 		.clk_out(uart_clk)
 	);
 
-	// parity_result will always be odd, adjust to be even if necessary
-	wire expected_parity = (PARITY_BIT == "odd") ? parity_result : ~parity_result;
+	// parity_result will always be even, adjust to be odd if necessary
+	wire expected_parity = (PARITY_BIT == "even") ? parity_result : ~parity_result;
 
 	// state machine
 	uart_state state;

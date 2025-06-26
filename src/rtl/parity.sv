@@ -1,4 +1,4 @@
-// Module for calculating odd parity
+// Module for calculating even parity
 module parity #(
 	parameter BITS = 8
 ) (
