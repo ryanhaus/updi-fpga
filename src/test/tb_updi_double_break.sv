@@ -68,7 +68,7 @@ module tb_updi_double_break();
 		// Pulse 3
 		i = 0;
 
-		while (busy) begin
+		while (busy && pulse == 'b0) begin
 			#10
 			clk = 'b1;
 
@@ -79,6 +79,21 @@ module tb_updi_double_break();
 		end
 
 		$display("Pulse 3 took %0d clocks (expected: %0d)", i, N_CLKS);
+
+		// Pulse 4
+		i = 0;
+
+		while (busy) begin
+			#10
+			clk = 'b1;
+
+			#10
+			clk = 'b0;
+
+			i = i + 'b1;
+		end
+
+		$display("Pulse 4 took %0d clocks (expected: %0d)", i, N_CLKS);
 
 		if (i != N_CLKS) $error();
 		if (busy) $error();

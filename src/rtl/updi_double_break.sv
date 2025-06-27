@@ -1,7 +1,5 @@
 // Handles doing a 'double break' to reset
-// the UPDI interface. A double break is a
-// long 1 pulse, followed by a long 0 pulse,
-// followed by another long 1 pulse.
+// the UPDI interface.
 module updi_double_break #(
 	parameter PULSE_CLK = 100000 // pulse length in clks
 ) (
@@ -20,7 +18,7 @@ module updi_double_break #(
 	localparam COUNTER_BITS = $clog2(PULSE_CLK);
 
 	logic [COUNTER_BITS-1 : 0] counter; // counts from 0 to PULSE_CLK
-	logic [1:0] pulse_n; // counts from 0 to 2
+	logic [1:0] pulse_n; // counts from 0 to 3
 
 	always_ff @(posedge clk) begin
 		if (rst) begin
@@ -38,7 +36,7 @@ module updi_double_break #(
 					counter <= PULSE_CLK - 1;
 
 					// if done reset, otherwise keep counting pulses
-					if (pulse_n == 'd2) begin
+					if (pulse_n == 'd3) begin
 						pulse_n <= 'b0;
 						busy <= 'b0;
 						done <= 'b1;
