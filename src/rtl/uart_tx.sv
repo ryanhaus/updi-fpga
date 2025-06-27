@@ -20,8 +20,8 @@ module uart_tx #(
 	logic [$clog2(DATA_BITS)-1 : 0] counter; // used for data & stop bits
 
 	// parity module
-	logic parity_result;
-	parity #(.BITS(DATA_BITS)) parity_inst (data, parity_result);
+	logic parity;
+	parity #(.BITS(DATA_BITS), .PARITY(PARITY_BIT)) parity_inst (data, parity);
 
 	// clock divider module
 	logic uart_clk, uart_clk_div_rst;
@@ -90,11 +90,7 @@ module uart_tx #(
 
 				UART_PARITY: begin
 					if (uart_clk == 'b1) begin
-						// handle parity, parity_result is always even parity
-						case (PARITY_BIT)
-							"even": tx <= parity_result;
-							"odd": tx <= ~parity_result;
-						endcase
+						tx <= parity;
 
 						// for just 1 stop bit, simply going back to idle is
 						// enough since it will pull TX high

@@ -24,8 +24,8 @@ module uart_rx #(
 	wire frame_parity = frame[$bits(frame)-1];
 
 	// parity module (for verification)
-	logic parity_result;
-	parity #(.BITS(DATA_BITS)) parity_inst (data, parity_result);
+	logic expected_parity;
+	parity #(.BITS(DATA_BITS), .PARITY(PARITY_BIT)) parity_inst (data, expected_parity);
 
 	// clock divider module
 	logic uart_clk, uart_clk_div_rst;
@@ -38,9 +38,6 @@ module uart_rx #(
 		.rst(rst || uart_clk_div_rst),
 		.clk_out(uart_clk)
 	);
-
-	// parity_result will always be even, adjust to be odd if necessary
-	wire expected_parity = (PARITY_BIT == "even") ? parity_result : ~parity_result;
 
 	// state machine
 	uart_state state;
