@@ -55,7 +55,15 @@ module tb_updi_phy();
 		#10 clk = 'b0;
 		uart_tx_fifo_wr_en = 'b0;
 
-		forever #10 clk = ~clk;
+		#10 clk = 'b1;
+		#10 clk = 'b0;
+
+		while (dut.uart_tx_active) begin
+			#10 clk = 'b1;
+			#10 clk = 'b0;
+		end
+
+		$finish;
 	end
 
 endmodule
