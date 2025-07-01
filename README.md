@@ -13,8 +13,7 @@ Note that for the main simulation, the `updi_phy` module is substituted for an i
 ### Prerequisites
 [Verilator](https://www.veripool.org/verilator/) is used to simulate the design.<br/>
 [Libserial](https://github.com/crayzeewulf/libserial) is used to interface with a connected USB to UART converter.<br/>
-In addition, `intelhex` is a required Python package.
-`python3-intelhex` is 
+In addition, `intelhex` is a required Python package.<br/>
 All other dependencies should be installed during the installation process for these.
 
 ### Main Simulation
