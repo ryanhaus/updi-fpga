@@ -37,7 +37,6 @@ module uart_tx #(
 		if (rst) begin
 			state <= UART_IDLE;
 			ready <= 'b0;
-			tx <= 'b1;
 		end
 		else begin
 			case (state)
@@ -52,7 +51,6 @@ module uart_tx #(
 					end
 					else begin
 						ready <= 'b1;
-						tx <= 'b1;
 					end
 				end
 
@@ -61,16 +59,12 @@ module uart_tx #(
 
 					// always one 0 bit
 					if (uart_clk == 'b1) begin
-						tx <= 'b0;
 						state <= UART_DATA;
 					end
 				end
 
 				UART_DATA: begin
 					if (uart_clk == 'b1) begin
-						// handle transmission
-						tx <= data[counter]; // LSB
-
 						// handle going to next state if applicable
 						if (counter == DATA_BITS-1) begin
 							if (PARITY_BIT == "none") begin
@@ -90,8 +84,6 @@ module uart_tx #(
 
 				UART_PARITY: begin
 					if (uart_clk == 'b1) begin
-						tx <= parity;
-
 						// for just 1 stop bit, simply going back to idle is
 						// enough since it will pull TX high
 						if (STOP_BITS > 1) begin
@@ -106,9 +98,6 @@ module uart_tx #(
 
 				UART_STOP: begin
 					if (uart_clk == 'b1) begin
-						// handle stop bit(s)
-						tx <= 'b1;
-
 						if (counter != 'b1) begin
 							// have to repeat for multiple stop bits
 							counter <= counter - 'b1;
@@ -122,6 +111,16 @@ module uart_tx #(
 				end
 			endcase
 		end
+	end
+
+	always_comb begin
+		case (state)
+			UART_IDLE: tx = 'b1;
+			UART_START: tx = 'b0;
+			UART_DATA: tx = data[counter];
+			UART_PARITY: tx = parity;
+			UART_STOP: tx = 'b1;
+		endcase
 	end
 
 endmodule
