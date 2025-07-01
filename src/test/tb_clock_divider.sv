@@ -19,10 +19,9 @@ module tb_clock_divider();
 
 		// shift values into register
 		for (i = 0; i < 10; i = i + 1) begin
+			out_reg[i] = out;
 			#10 clk = 'b1;
 			#10 clk = 'b0;
-
-			out_reg[i] = out;
 		end
 
 		// verify

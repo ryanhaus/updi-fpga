@@ -23,17 +23,23 @@ module clock_divider #(
 			always_ff @(posedge clk_in) begin
 				if (rst) begin
 					counter <= 'b0;
-					clk_out <= 'b0;
 				end
 				else begin
-					clk_out <= (counter == SHIFT[COUNTER_BITS-1 : 0]);
-
 					if (counter == DIV - 1) begin
 						counter <= 'b0;
 					end
 					else begin
 						counter <= counter + 'b1;
 					end
+				end
+			end
+
+			always_comb begin
+				if (rst) begin
+					clk_out = 'b0;
+				end
+				else begin
+					clk_out = (counter == SHIFT[COUNTER_BITS-1 : 0]);
 				end
 			end
 		end
