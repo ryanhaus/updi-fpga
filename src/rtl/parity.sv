@@ -4,21 +4,21 @@ module parity #(
 	parameter PARITY = "even" // "none", "even", or "odd"
 ) (
 	input [BITS-1 : 0] value,
-	output logic parity
+	output logic out
 );
 
 	integer i;
 
 	always_comb begin
-		parity = 'b0;
+		out = 'b0;
 
 		if (PARITY != "none") begin
 			for (i = 0; i < BITS; i = i + 1) begin
-				parity ^= value[i];
+				out ^= value[i];
 			end
 
 			if (PARITY == "odd") begin
-				parity = ~parity;
+				out = ~out;
 			end
 		end
 	end

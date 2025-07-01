@@ -2,7 +2,7 @@
 // module together
 module program_rom #(
 	parameter FILE_NAME = "",
-	parameter SIZE = 1,
+	parameter SIZE = 16,
 	parameter DATA_BLOCK_MAX_SIZE = 64,
 	parameter ROM_ADDR_BITS = $clog2(SIZE),
 	localparam ROM_DATA_BITS = 8

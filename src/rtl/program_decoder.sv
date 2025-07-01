@@ -11,7 +11,7 @@ typedef enum {
 // with certain metadata stripped away. See src/util/program_convert.py
 /* verilator lint_off WIDTHEXPAND */
 module program_decoder #(
-	parameter PROGRAM_SIZE = 1, // size of program in bytes
+	parameter PROGRAM_SIZE = 16, // size of program in bytes
 	parameter PROG_ADDR_BITS = $clog2(PROGRAM_SIZE), // bits needed for program address
 	parameter DATA_BLOCK_MAX_SIZE = 64, // max number of data bytes per block
 	parameter DATA_BLOCK_ADDR_BITS = $clog2(DATA_BLOCK_MAX_SIZE) // bits for data in block

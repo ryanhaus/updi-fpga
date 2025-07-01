@@ -1,7 +1,7 @@
 // Read-only memory from a .mem file
 module rom #(
 	parameter FILE_NAME = "",
-	parameter SIZE = 1,
+	parameter SIZE = 16,
 	parameter DATA_BITS = 8,
 	parameter ADDR_BITS = $clog2(SIZE)
 ) (

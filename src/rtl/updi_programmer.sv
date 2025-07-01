@@ -57,7 +57,7 @@ typedef enum {
 // of the UPDI-capable chip.
 module updi_programmer #(
 	parameter ROM_FILE_NAME = "",
-	parameter ROM_SIZE = 1,
+	parameter ROM_SIZE = 16,
 	parameter ROM_ADDR_BITS = $clog2(ROM_SIZE),
 	parameter ROM_DATA_BITS = 8,
 

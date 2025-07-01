@@ -6,7 +6,7 @@ typedef enum {
 
 // Single-port random-access memory
 module spram #(
-	parameter SIZE = 1,
+	parameter SIZE = 16,
 	parameter DATA_BITS = 8,
 	parameter ADDR_BITS = $clog2(SIZE),
 	parameter DELETE_ON_RESET = 0
