@@ -22,6 +22,7 @@ test_lint_targets := $(patsubst tb_%,test_lint_%,$(test_names))
 srcs := $(wildcard src/rtl/*.sv)
 src_names := $(patsubst src/rtl/%.sv,%,$(srcs))
 src_lint_targets := $(patsubst %,src_lint_%,$(src_names))
+src_lint_targets := $(filter-out src_lint_include,$(src_lint_targets))
 
 # lint all verilog
 lint: sim_lint test_lint src_lint
