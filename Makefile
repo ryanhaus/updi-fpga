@@ -19,9 +19,12 @@ test_names := $(patsubst src/test/%.sv,%,$(test_srcs))
 test_objects := $(patsubst %,obj_dir/V%,$(test_names))
 test_lint_targets := $(patsubst tb_%,test_lint_%,$(test_names))
 
+srcs := $(wildcard src/rtl/*.sv)
+src_names := $(patsubst src/rtl/%.sv,%,$(srcs))
+src_lint_targets := $(patsubst %,src_lint_%,$(src_names))
 
 # lint all verilog
-lint: sim_lint test_lint
+lint: sim_lint test_lint src_lint
 
 sim_lint:
 	verilator \
@@ -43,6 +46,18 @@ test_lint_%:
 		--lint-only \
 		--timing \
 		--top-module tb_$*
+
+src_lint: $(src_lint_targets)
+
+src_lint_%:
+	verilator \
+		$(VERILATOR_FLAGS) \
+		-y src/rtl \
+		src/*/*.sv \
+		-sv \
+		--lint-only \
+		--timing \
+		--top-module $*
 
 # generate simulation binary
 sim: obj_dir/Vtop
