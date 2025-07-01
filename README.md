@@ -5,7 +5,7 @@ Programming an ATtiny816 via [UPDI](https://onlinedocs.microchip.com/oxy/GUID-19
 The top-level module has two modules contained inside of it, `updi_programmer` and `updi_phy`.<br/>
 The `updi_programmer` module is responsible for all of the logic involved in programming the UPDI-capable microcontroller.<br/>
 The `updi_phy` module is responsible for taking the input/output bytes from the programmer module and converting it into a half-duplex UART stream (i.e., UPDI). In addition, this module is responsible for performing 'double breaks', which effectively reset the UPDI chip.<br/>
-The two modules interface with each other via two FIFO interfaces. A block diagram showing the design with a max depth of 2 is shown below:<br/>
+The two modules interface with each other via two FIFO interfaces. A block diagram showing the overall design is shown below:<br/>
 ![Block Diagram Image](images/block_diagram.png)
 Note that for the main simulation, the `updi_phy` module is substituted for an implementation in C++.
 
@@ -13,6 +13,8 @@ Note that for the main simulation, the `updi_phy` module is substituted for an i
 ### Prerequisites
 [Verilator](https://www.veripool.org/verilator/) is used to simulate the design.<br/>
 [Libserial](https://github.com/crayzeewulf/libserial) is used to interface with a connected USB to UART converter.<br/>
+In addition, `intelhex` is a required Python package.
+`python3-intelhex` is 
 All other dependencies should be installed during the installation process for these.
 
 ### Main Simulation
