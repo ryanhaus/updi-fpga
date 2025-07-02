@@ -12,7 +12,9 @@ module uart_fifo #(
 	parameter PARITY_BIT = "none", // "none", "even", or "odd"
 	parameter STOP_BITS = 1, // 1 - 2
 	parameter FIFO_DEPTH = 16, // how many values
-	parameter UART_CLK_DIV = 10
+	parameter UART_CLK_DIV = 10,
+	parameter ALMOST_EMPTY_THRESHOLD = 3,
+	parameter ALMOST_FULL_THRESHOLD = 3
 ) (
 	input clk,
 	input rst,
@@ -24,9 +26,14 @@ module uart_fifo #(
 	input rx_fifo_rd_en,
 
 	output tx_fifo_full,
+	output tx_fifo_almost_full,
 	output tx_fifo_empty,
+	output tx_fifo_almost_empty,
+
 	output rx_fifo_full,
+	output rx_fifo_almost_full,
 	output rx_fifo_empty,
+	output rx_fifo_almost_empty,
 
 	output rx_error,
 	output logic uart_busy,
@@ -60,7 +67,12 @@ module uart_fifo #(
 	);
 
 	// FIFOs
-	fifo #(.DEPTH(FIFO_DEPTH), .WIDTH(DATA_BITS)) tx_fifo (
+	fifo #(
+		.DEPTH(FIFO_DEPTH),
+		.WIDTH(DATA_BITS),
+		.ALMOST_EMPTY_THRESHOLD(ALMOST_EMPTY_THRESHOLD),
+		.ALMOST_FULL_THRESHOLD(ALMOST_FULL_THRESHOLD)
+	) tx_fifo (
 		.clk(clk),
 		.rst(rst),
 		.in(tx_data),
@@ -68,10 +80,17 @@ module uart_fifo #(
 		.rd_en(tx_fifo_rd_en),
 		.wr_en(tx_fifo_wr_en),
 		.empty(tx_fifo_empty),
-		.full(tx_fifo_full)
+		.almost_empty(tx_fifo_almost_empty),
+		.full(tx_fifo_full),
+		.almost_full(tx_fifo_almost_full)
 	);
 
-	fifo #(.DEPTH(FIFO_DEPTH), .WIDTH(DATA_BITS)) rx_fifo (
+	fifo #(
+		.DEPTH(FIFO_DEPTH),
+		.WIDTH(DATA_BITS),
+		.ALMOST_EMPTY_THRESHOLD(ALMOST_EMPTY_THRESHOLD),
+		.ALMOST_FULL_THRESHOLD(ALMOST_FULL_THRESHOLD)
+	) rx_fifo (
 		.clk(clk),
 		.rst(rst),
 		.in(rx_data_current),
@@ -79,7 +98,9 @@ module uart_fifo #(
 		.rd_en(rx_fifo_rd_en),
 		.wr_en(rx_fifo_wr_en),
 		.empty(rx_fifo_empty),
-		.full(rx_fifo_full)
+		.almost_empty(rx_fifo_almost_empty),
+		.full(rx_fifo_full),
+		.almost_full(rx_fifo_almost_full)
 	);
 
 	// RX controller logic

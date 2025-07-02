@@ -13,10 +13,12 @@ module updi_phy #(
 	input [7:0] uart_tx_fifo_data,
 	input uart_tx_fifo_wr_en,
 	output uart_tx_fifo_full,
+	output uart_tx_fifo_almost_full,
 
 	output [7:0] uart_rx_fifo_data,
 	input uart_rx_fifo_rd_en,
 	output uart_rx_fifo_empty,
+	output uart_rx_fifo_almost_empty,
 	output rx_error,
 
 	// UPDI double break interface
@@ -48,9 +50,13 @@ module updi_phy #(
 		.tx_fifo_wr_en(uart_tx_fifo_wr_en),
 		.rx_fifo_rd_en(uart_rx_fifo_rd_en),
 		.tx_fifo_full(uart_tx_fifo_full),
+		.tx_fifo_almost_full(uart_tx_fifo_almost_full),
 		.tx_fifo_empty(),
+		.tx_fifo_almost_empty(),
 		.rx_fifo_full(),
+		.rx_fifo_almost_full(),
 		.rx_fifo_empty(uart_rx_fifo_empty),
+		.rx_fifo_almost_empty(uart_rx_fifo_almost_empty),
 		.rx_error(rx_error),
 		.uart_busy(uart_tx_active),
 		.tx(tx),

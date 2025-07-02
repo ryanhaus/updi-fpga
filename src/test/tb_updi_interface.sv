@@ -67,7 +67,9 @@ module tb_updi_interface();
 		.rd_en(tx_out_fifo_rd_en),
 		.wr_en(uart_tx_fifo_wr_en),
 		.empty(tx_out_fifo_empty),
-		.full(uart_tx_fifo_full)
+		.almost_empty(),
+		.full(uart_tx_fifo_full),
+		.almost_full()
 	);
 	
 	// fifo instance (for RX input)
@@ -82,7 +84,9 @@ module tb_updi_interface();
 		.rd_en(uart_rx_fifo_rd_en),
 		.wr_en(rx_in_fifo_wr_en),
 		.empty(uart_rx_fifo_empty),
-		.full(rx_in_fifo_full)
+		.almost_empty(),
+		.full(rx_in_fifo_full),
+		.almost_full()
 	);
 
 	// fifo instance (for RX output)
@@ -96,7 +100,9 @@ module tb_updi_interface();
 		.rd_en(rx_out_fifo_rd_en),
 		.wr_en(out_rx_fifo_wr_en),
 		.empty(rx_out_fifo_empty),
-		.full(out_rx_fifo_full)
+		.almost_empty(),
+		.full(out_rx_fifo_full),
+		.almost_full()
 	);
 
 	// testbench logic

@@ -4,9 +4,9 @@ module tb_fifo();
 	parameter DEPTH = 32;
 	parameter WIDTH = 8;
 
-	logic clk, rst, rd_en, wr_en, empty, full;
+	logic clk, rst, rd_en, wr_en, empty, almost_empty, full, almost_full;
 	logic [WIDTH-1 : 0] in, out;
-	fifo #(DEPTH, WIDTH) dut (clk, rst, in, out, rd_en, wr_en, empty, full);
+	fifo #(DEPTH, WIDTH) dut (clk, rst, in, out, rd_en, wr_en, empty, almost_empty, full, almost_full);
 
 	integer i;
 

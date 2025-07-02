@@ -5,20 +5,22 @@ module tb_updi_instruction_queue_handler();
 	parameter DATA_ADDR_BITS = $clog2(MAX_DATA_SIZE);
 
 	// signals
-	logic clk, rst, start, ready, done, waiting_for_ack, ack_received, fifo_wr_en, fifo_full;
+	logic clk, rst, start, ready, done, waiting_for_ack, ack_received,
+		fifo_wr_en, fifo_full, fifo_almost_full;
 	logic [7:0] opcode, fifo_data;
 	logic [7:0] data [MAX_DATA_SIZE];
 	logic [DATA_ADDR_BITS : 0] data_len;
 	logic [MAX_DATA_SIZE-1 : 0] wait_ack_after;
 	logic [7:0] fifo_out;
-	logic fifo_rd_en, fifo_empty;
+	logic fifo_rd_en, fifo_empty, fifo_almost_empty;
 
 	// fifo
 	fifo #(.DEPTH(4)) fifo_inst (
 		clk, rst,
 		fifo_data, fifo_out,
 		fifo_rd_en, fifo_wr_en,
-		fifo_empty, fifo_full
+		fifo_empty, fifo_almost_empty,
+		fifo_full, fifo_almost_full
 	);
 
 	// dut on posedge

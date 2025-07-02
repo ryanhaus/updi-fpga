@@ -197,7 +197,9 @@ module updi_programmer #(
 		.rd_en(out_rx_fifo_rd_en),
 		.wr_en(out_rx_fifo_wr_en),
 		.empty(out_rx_fifo_empty),
-		.full(out_rx_fifo_full)
+		.almost_empty(),
+		.full(out_rx_fifo_full),
+		.almost_full()
 	);
 
 	// delay instance

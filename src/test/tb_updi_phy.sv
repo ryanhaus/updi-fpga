@@ -4,16 +4,16 @@ module tb_updi_phy();
 
 	// UPDI PHY instance
 	logic [7:0] uart_tx_fifo_data, uart_rx_fifo_data;
-	logic uart_tx_fifo_wr_en, uart_tx_fifo_full,
-		uart_rx_fifo_rd_en, uart_rx_fifo_empty, rx_error,
+	logic uart_tx_fifo_wr_en, uart_tx_fifo_full, uart_tx_fifo_almost_full,
+		uart_rx_fifo_rd_en, uart_rx_fifo_empty, uart_rx_fifo_almost_empty, rx_error,
 		double_break_start, double_break_busy, double_break_done;
 
 	updi_phy #(
 		.DOUBLE_BREAK_PULSE_CLK(250)
 	) dut (
 		clk, rst,
-		uart_tx_fifo_data, uart_tx_fifo_wr_en, uart_tx_fifo_full,
-		uart_rx_fifo_data, uart_rx_fifo_rd_en, uart_rx_fifo_empty, rx_error,
+		uart_tx_fifo_data, uart_tx_fifo_wr_en, uart_tx_fifo_full, uart_tx_fifo_almost_full,
+		uart_rx_fifo_data, uart_rx_fifo_rd_en, uart_rx_fifo_empty, uart_rx_fifo_almost_empty, rx_error,
 		double_break_start, double_break_busy, double_break_done,
 		updi
 	);

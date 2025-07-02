@@ -9,8 +9,8 @@ module tb_uart_fifo();
   	logic clk, rst;
   	logic [DATA_BITS-1 : 0] tx_data, rx_data;
   	logic tx_fifo_wr_en, rx_fifo_rd_en;
-  	logic tx_fifo_full, tx_fifo_empty;
-  	logic rx_fifo_full, rx_fifo_empty;
+  	logic tx_fifo_full, tx_fifo_almost_full, tx_fifo_empty, tx_fifo_almost_empty;
+  	logic rx_fifo_full, rx_fifo_almost_full, rx_fifo_empty, rx_fifo_almost_empty;
   	logic rx_error, uart_busy;
   	logic tx;
 
@@ -22,9 +22,13 @@ module tb_uart_fifo();
   	  .tx_fifo_wr_en(tx_fifo_wr_en),
   	  .rx_fifo_rd_en(rx_fifo_rd_en),
   	  .tx_fifo_full(tx_fifo_full),
+	  .tx_fifo_almost_full(tx_fifo_almost_full),
   	  .tx_fifo_empty(tx_fifo_empty),
+	  .tx_fifo_almost_empty(tx_fifo_almost_empty),
   	  .rx_fifo_full(rx_fifo_full),
+	  .rx_fifo_almost_full(rx_fifo_almost_full),
   	  .rx_fifo_empty(rx_fifo_empty),
+	  .rx_fifo_almost_empty(rx_fifo_almost_empty),
   	  .rx_error(rx_error),
 	  .uart_busy(uart_busy),
   	  .tx(tx),

@@ -29,7 +29,9 @@ module tb_updi_input_handler();
 		.rd_en(in_fifo_rd_en),
 		.wr_en(rx_fifo_wr_en),
 		.empty(in_fifo_empty),
-		.full(rx_fifo_full)
+		.almost_empty(),
+		.full(rx_fifo_full),
+		.almost_full()
 	);
 
 	// output FIFO
@@ -44,7 +46,9 @@ module tb_updi_input_handler();
 		.rd_en(tx_fifo_rd_en),
 		.wr_en(out_fifo_wr_en),
 		.empty(tx_fifo_empty),
-		.full(out_fifo_full)
+		.almost_empty(),
+		.full(out_fifo_full),
+		.almost_full()
 	);
 
 	// testbench logic
