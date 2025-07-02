@@ -39,6 +39,7 @@ module fifo #(
 			out <= 'b0;
 			rd_ptr <= 'b0;
 			wr_ptr <= 'b0;
+			n_elements <= 'b0;
 		end
 		else begin
 			// handle a read
