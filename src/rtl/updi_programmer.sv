@@ -69,7 +69,9 @@ module updi_programmer #(
 	parameter RX_OUT_FIFO_DEPTH = 16,
 
 	parameter DELAY_N_CLKS = 100,
-	parameter TIMEOUT_CLKS = 100
+	parameter TIMEOUT_CLKS = 100,
+
+	parameter AUTO_START = 0
 ) (
 	input clk,
 	input rst,
@@ -219,7 +221,9 @@ module updi_programmer #(
 		prev_state <= state;
 
 		if (rst) begin
-			state <= UPDI_PROG_IDLE;
+			state <= AUTO_START
+				? UPDI_PROG_RESET_UPDI_DB_START
+				: UPDI_PROG_IDLE;
 		end
 		else if (error) begin
 			state <= UPDI_PROG_RESET_UPDI_DB_START;

@@ -79,7 +79,8 @@ module top (
 		.ROM_FILE_NAME("program.mem"),
 		.ROM_SIZE(512),
 		.DELAY_N_CLKS(DELAY_CLKS),
-		.TIMEOUT_CLKS(TIMEOUT_CLKS)
+		.TIMEOUT_CLKS(TIMEOUT_CLKS),
+		.AUTO_START(1)
 	) programmer_inst (
 		.clk(clk),
 		.rst(rst),
