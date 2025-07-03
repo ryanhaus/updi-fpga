@@ -64,9 +64,9 @@ module top (
 	localparam TIMEOUT_MS = 500;
 	localparam UART_CLK_FREQ = 57600;
 
-	localparam DOUBLE_BREAK_CLKS = CLK_FREQ * DOUBLE_BREAK_MS / 1000;
-	localparam DELAY_CLKS = CLK_FREQ * DELAY_MS / 1000;
-	localparam TIMEOUT_CLKS = CLK_FREQ * TIMEOUT_MS / 1000;
+	localparam DOUBLE_BREAK_CLKS = CLK_FREQ / 1000 * DOUBLE_BREAK_MS;
+	localparam DELAY_CLKS = CLK_FREQ / 1000 * DELAY_MS;
+	localparam TIMEOUT_CLKS = CLK_FREQ / 1000 * TIMEOUT_MS;
 	localparam UART_CLK_DIV = CLK_FREQ / UART_CLK_FREQ;
 
 	// programmer instance
