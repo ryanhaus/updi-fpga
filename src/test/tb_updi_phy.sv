@@ -1,6 +1,7 @@
 module tb_updi_phy();
 
 	logic clk, rst;
+	logic join_updis;
 
 	// UPDI PHY instance 1
 	logic [7:0] uart_tx_fifo_data1, uart_rx_fifo_data1;
@@ -39,9 +40,13 @@ module tb_updi_phy();
 	initial #100000 $error();
 	int i;
 
+	assign updi2 = (join_updis && dut1.bridge_inst.updi_en) ? updi1 : 'b1;
+
 	initial begin
 		$dumpfile("trace/tb_updi_phy.fst");
 		$dumpvars();
+
+		join_updis = 'b0;
 
 		// reset
 		clk = 'b0;
@@ -67,6 +72,8 @@ module tb_updi_phy();
 		if (i != 1000) $error();
 
 		// send test value
+		join_updis = 'b1;
+
 		uart_tx_fifo_data1 = 'h55;
 		uart_tx_fifo_wr_en1 = 'b1;
 		#10 clk = 'b1;
@@ -80,6 +87,19 @@ module tb_updi_phy();
 			#10 clk = 'b1;
 			#10 clk = 'b0;
 		end
+
+		// make sure that the other phy instance was able to read it properly
+		while (uart_rx_fifo_empty2) begin
+			#10 clk = 'b1;
+			#10 clk = 'b0;
+		end
+
+		uart_rx_fifo_rd_en2 = 'b1;
+		#10 clk = 'b1;
+		#10 clk = 'b0;
+		uart_rx_fifo_rd_en2 = 'b0;
+
+		if (uart_rx_fifo_data2 != 'h55) $error();
 
 		$finish;
 	end
