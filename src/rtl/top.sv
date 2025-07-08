@@ -90,7 +90,7 @@ module top (
 		.ROM_SIZE(512),
 		.DELAY_N_CLKS(DELAY_CLKS),
 		.TIMEOUT_CLKS(TIMEOUT_CLKS),
-		.AUTO_START(1)
+		.AUTO_START(0)
 	) programmer_inst (
 		.clk(clk),
 		.rst(rst | autorst),
