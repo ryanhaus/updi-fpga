@@ -3,3 +3,9 @@ trace
 obj_dir
 src/generated
 *.vcd
+updi-fpga.cache
+updi-fpga.hw
+updi-fpga.ip_user_files
+updi-fpga.runs
+updi-fpga.sim
+updi-fpga.srcs
