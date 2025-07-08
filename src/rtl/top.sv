@@ -52,7 +52,7 @@ endmodule
 // top-level module for synthesis
 module top (
 	input clk,
-	input rst,
+	input rst_btn,
 	input programmer_start,
 	output programmer_busy,
 	inout updi
@@ -76,6 +76,8 @@ module top (
 	always @(posedge clk) begin
 		autorst <= 'b0;
 	end
+	
+	logic rst = ~rst_btn;
 
 	// programmer instance
 	logic [7:0] uart_tx_fifo_data_in, uart_rx_fifo_data_out;
