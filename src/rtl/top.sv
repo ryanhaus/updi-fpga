@@ -69,6 +69,14 @@ module top (
 	localparam TIMEOUT_CLKS = CLK_FREQ / 1000 * TIMEOUT_MS;
 	localparam UART_CLK_DIV = CLK_FREQ / UART_CLK_FREQ;
 
+	// auto reset
+	logic autorst;
+	initial autorst = 'b1;
+
+	always @(posedge clk) begin
+		autorst <= 'b0;
+	end
+
 	// programmer instance
 	logic [7:0] uart_tx_fifo_data_in, uart_rx_fifo_data_out;
 	logic uart_tx_fifo_wr_en, uart_tx_fifo_full;
@@ -83,7 +91,7 @@ module top (
 		.AUTO_START(1)
 	) programmer_inst (
 		.clk(clk),
-		.rst(rst),
+		.rst(rst | autorst),
 		.start(programmer_start),
 		.busy(programmer_busy),
 		.phy_error(phy_error),
@@ -104,7 +112,7 @@ module top (
 		.UART_CLK_DIV(UART_CLK_DIV)
 	) phy_inst (
 		.clk(clk),
-		.rst(rst),
+		.rst(rst | autorst),
 		.uart_tx_fifo_data(uart_tx_fifo_data_in),
 		.uart_tx_fifo_wr_en(uart_tx_fifo_wr_en),
 		.uart_tx_fifo_full(uart_tx_fifo_full),
