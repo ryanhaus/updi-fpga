@@ -68,8 +68,9 @@ module updi_programmer #(
 
 	parameter RX_OUT_FIFO_DEPTH = 16,
 
-	parameter DELAY_N_CLKS = 100,
-	parameter TIMEOUT_CLKS = 100,
+	parameter DELAY_N_CLKS = 1000,
+	parameter TIMEOUT_CLKS = 1000,
+	parameter POST_READ_DELAY_CLKS = 1000,
 
 	parameter AUTO_START = 0
 ) (
@@ -152,7 +153,8 @@ module updi_programmer #(
 	updi_interface #(
 		.MAX_DATA_SIZE(MAX_INSTRUCTION_DATA_SIZE),
 		.DATA_ADDR_BITS(DATA_ADDR_BITS),
-		.TIMEOUT_CLKS(TIMEOUT_CLKS)
+		.TIMEOUT_CLKS(TIMEOUT_CLKS),
+		.POST_READ_DELAY_CLKS(POST_READ_DELAY_CLKS)
 	) interface_inst (
 		.clk(clk),
 		.rst(rst | error),

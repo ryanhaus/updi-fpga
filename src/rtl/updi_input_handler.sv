@@ -5,6 +5,8 @@ typedef enum {
 	UPDI_IN_HDLR_CHECK_ACK,
 	UPDI_IN_HDLR_FIFO_READ,
 	UPDI_IN_HDLR_FIFO_WRITE,
+	UPDI_IN_HDLR_DELAY_START,
+	UPDI_IN_HDLR_DELAY,
 	UPDI_IN_HDLR_DONE
 } updi_input_handler_state;
 
@@ -14,7 +16,8 @@ typedef enum {
 // FIFO.
 module updi_input_handler #(
 	parameter BITS_N = 6, // number of bits for the 'n_bytes' parameter, which determines number of bytes read
-	parameter TIMEOUT_CLKS = 1000 // number of clocks without a response to constitute a timeout
+	parameter TIMEOUT_CLKS = 1000, // number of clocks without a response to constitute a timeout
+	parameter POST_READ_DELAY_CLKS = 1000 // number of clocks to wait after reading all values
 ) (
 	input clk,
 	input rst,
@@ -49,7 +52,19 @@ module updi_input_handler #(
 		.clk(clk),
 		.rst(rst | timeout_rst),
 		.start(timeout_start),
+		.active(),
 		.done(timeout_done)
+	);
+
+	// delay module for waiting a bit after reading values
+	logic post_read_delay_start, post_read_delay_done;
+
+	delay #(.N_CLKS(POST_READ_DELAY_CLKS)) post_read_delay_inst (
+		.clk(clk),
+		.rst(rst),
+		.start(post_read_delay_start),
+		.active(),
+		.done(post_read_delay_done)
 	);
 
 	// state machine
@@ -101,12 +116,22 @@ module updi_input_handler #(
 				UPDI_IN_HDLR_FIFO_WRITE: begin
 					if (!out_fifo_full) begin
 						if (counter == 'b1) begin
-							state <= UPDI_IN_HDLR_DONE;
+							state <= UPDI_IN_HDLR_DELAY_START;
 						end
 						else begin
 							counter <= counter - 'b1;
 							state <= UPDI_IN_HDLR_FIFO_READ;
 						end
+					end
+				end
+				
+				UPDI_IN_HDLR_DELAY_START: begin
+					state <= UPDI_IN_HDLR_DELAY;
+				end
+
+				UPDI_IN_HDLR_DELAY: begin
+					if (post_read_delay_done) begin
+						state <= UPDI_IN_HDLR_DONE;
 					end
 				end
 
@@ -127,6 +152,7 @@ module updi_input_handler #(
 		timeout = 'b0;
 		timeout_rst = 'b1;
 		timeout_start = 'b0;
+		post_read_delay_start = 'b0;
 
 		case (state)
 			UPDI_IN_HDLR_IDLE: begin
@@ -174,6 +200,10 @@ module updi_input_handler #(
 				if (!out_fifo_full) begin
 					out_fifo_wr_en = 'b1;
 				end
+			end
+
+			UPDI_IN_HDLR_DELAY_START: begin
+				post_read_delay_start = 'b1;
 			end
 
 			UPDI_IN_HDLR_DONE: begin

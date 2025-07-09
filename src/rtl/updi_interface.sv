@@ -3,7 +3,8 @@
 module updi_interface #(
 	parameter MAX_DATA_SIZE = 16,
 	parameter DATA_ADDR_BITS = $clog2(MAX_DATA_SIZE),
-	parameter TIMEOUT_CLKS = 100
+	parameter TIMEOUT_CLKS = 1000,
+	parameter POST_READ_DELAY_CLKS = 1000
 ) (
 	input clk,
 	input rst,
@@ -89,7 +90,8 @@ module updi_interface #(
 	// input handler instance
 	updi_input_handler #(
 		.BITS_N(DATA_ADDR_BITS),
-		.TIMEOUT_CLKS(TIMEOUT_CLKS)
+		.TIMEOUT_CLKS(TIMEOUT_CLKS),
+		.POST_READ_DELAY_CLKS(POST_READ_DELAY_CLKS)
 	) input_hdlr (
 		.clk(clk),
 		.rst(rst),
