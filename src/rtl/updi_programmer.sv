@@ -70,7 +70,8 @@ module updi_programmer #(
 
 	parameter DELAY_N_CLKS = 1000,
 	parameter TIMEOUT_CLKS = 1000,
-	parameter POST_READ_DELAY_CLKS = 1000,
+	parameter POST_READ_DELAY_CLKS = 10,
+	parameter POST_WRITE_DELAY_CLKS = 10,
 
 	parameter AUTO_START = 0
 ) (
@@ -154,7 +155,8 @@ module updi_programmer #(
 		.MAX_DATA_SIZE(MAX_INSTRUCTION_DATA_SIZE),
 		.DATA_ADDR_BITS(DATA_ADDR_BITS),
 		.TIMEOUT_CLKS(TIMEOUT_CLKS),
-		.POST_READ_DELAY_CLKS(POST_READ_DELAY_CLKS)
+		.POST_READ_DELAY_CLKS(POST_READ_DELAY_CLKS),
+		.POST_WRITE_DELAY_CLKS(POST_WRITE_DELAY_CLKS)
 	) interface_inst (
 		.clk(clk),
 		.rst(rst | error),

@@ -4,6 +4,8 @@ typedef enum {
 	UPDI_INSTR_HDLR_WR_SYNCH,
 	UPDI_INSTR_HDLR_WR_OPCODE,
 	UPDI_INSTR_HDLR_WR_DATA,
+	UPDI_INSTR_HDLR_DELAY_START,
+	UPDI_INSTR_HDLR_DELAY,
 	UPDI_INSTR_HDLR_WAIT_ACK
 } updi_instruction_queue_handler_state;
 
@@ -11,7 +13,8 @@ typedef enum {
 // the instructions to an external FIFO. Also handles waiting for ACK signals
 module updi_instruction_queue_handler #(
 	parameter MAX_DATA_SIZE = 16,
-	parameter DATA_ADDR_BITS = $clog2(MAX_DATA_SIZE)
+	parameter DATA_ADDR_BITS = $clog2(MAX_DATA_SIZE),
+	parameter POST_WRITE_DELAY_CLKS = 1000
 ) (
 	input clk,
 	input rst,
@@ -34,6 +37,17 @@ module updi_instruction_queue_handler #(
 	output logic fifo_wr_en,
 	input fifo_full
 );
+
+	// delay module for post-command delays
+	logic post_write_delay_start, post_write_delay_done;
+
+	delay #(.N_CLKS(POST_WRITE_DELAY_CLKS)) post_write_delay_inst (
+		.clk(clk),
+		.rst(rst),
+		.start(post_write_delay_start),
+		.active(),
+		.done(post_write_delay_done)
+	);
 
 	// state machine
 	updi_instruction_queue_handler_state state;
@@ -90,12 +104,22 @@ module updi_instruction_queue_handler #(
 							state <= UPDI_INSTR_HDLR_WAIT_ACK;
 						end
 						else if (counter == data_len - 'b1) begin
-							state <= UPDI_INSTR_HDLR_IDLE;
-							done <= 'b1;
+							state <= UPDI_INSTR_HDLR_DELAY_START;
 						end
 						else begin
 							counter <= counter + 'b1;
 						end
+					end
+				end
+
+				UPDI_INSTR_HDLR_DELAY_START: begin
+					state <= UPDI_INSTR_HDLR_DELAY;
+				end
+
+				UPDI_INSTR_HDLR_DELAY: begin
+					if (post_write_delay_done) begin
+						done <= 'b1;
+						state <= UPDI_INSTR_HDLR_IDLE;
 					end
 				end
 
@@ -126,6 +150,7 @@ module updi_instruction_queue_handler #(
 	always_comb begin
 		fifo_data = 'b0;
 		fifo_wr_en = 'b0;
+		post_write_delay_start = 'b0;
 
 		case (state)
 			UPDI_INSTR_HDLR_WR_SYNCH: begin
@@ -141,6 +166,10 @@ module updi_instruction_queue_handler #(
 			UPDI_INSTR_HDLR_WR_DATA: begin
 				fifo_data = data[index];
 				fifo_wr_en = 'b1;
+			end
+
+			UPDI_INSTR_HDLR_DELAY_START: begin
+				post_write_delay_start = 'b1;
 			end
 		endcase
 	end

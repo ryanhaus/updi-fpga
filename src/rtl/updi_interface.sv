@@ -4,7 +4,8 @@ module updi_interface #(
 	parameter MAX_DATA_SIZE = 16,
 	parameter DATA_ADDR_BITS = $clog2(MAX_DATA_SIZE),
 	parameter TIMEOUT_CLKS = 1000,
-	parameter POST_READ_DELAY_CLKS = 1000
+	parameter POST_READ_DELAY_CLKS = 1000,
+	parameter POST_WRITE_DELAY_CLKS = 1000
 ) (
 	input clk,
 	input rst,
@@ -69,7 +70,8 @@ module updi_interface #(
 	// instruction queue handler instance
 	updi_instruction_queue_handler #(
 		.MAX_DATA_SIZE(MAX_DATA_SIZE),
-		.DATA_ADDR_BITS(DATA_ADDR_BITS)
+		.DATA_ADDR_BITS(DATA_ADDR_BITS),
+		.POST_WRITE_DELAY_CLKS(POST_WRITE_DELAY_CLKS)
 	) instr_hdlr (
 		.clk(clk),
 		.rst(rst),

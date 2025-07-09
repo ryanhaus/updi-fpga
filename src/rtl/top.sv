@@ -63,12 +63,14 @@ module top (
 	localparam DELAY_MS = 50;
 	localparam TIMEOUT_MS = 500;
 	localparam POST_READ_DELAY_US = 100;
+	localparam POST_WRITE_DELAY_US = 1000;
 	localparam UART_CLK_FREQ = 57600;
 
 	localparam DOUBLE_BREAK_CLKS = CLK_FREQ / 1000 * DOUBLE_BREAK_MS;
 	localparam DELAY_CLKS = CLK_FREQ / 1000 * DELAY_MS;
 	localparam TIMEOUT_CLKS = CLK_FREQ / 1000 * TIMEOUT_MS;
 	localparam POST_READ_DELAY_CLKS = CLK_FREQ / 1000000 * POST_READ_DELAY_US;
+	localparam POST_WRITE_DELAY_CLKS = CLK_FREQ / 1000000 * POST_WRITE_DELAY_US;
 	localparam UART_CLK_DIV = CLK_FREQ / UART_CLK_FREQ;
 
 	// auto reset
@@ -93,6 +95,7 @@ module top (
 		.DELAY_N_CLKS(DELAY_CLKS),
 		.TIMEOUT_CLKS(TIMEOUT_CLKS),
 		.POST_READ_DELAY_CLKS(POST_READ_DELAY_CLKS),
+		.POST_WRITE_DELAY_CLKS(POST_WRITE_DELAY_CLKS),
 		.AUTO_START(0)
 	) programmer_inst (
 		.clk(clk),
