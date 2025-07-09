@@ -207,6 +207,7 @@ module updi_programmer #(
 		.clk(clk),
 		.rst(rst | error),
 		.start(delay_start),
+		.active(),
 		.done(delay_done)
 	);
 

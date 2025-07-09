@@ -7,11 +7,11 @@ module delay #(
 	input rst,
 
 	input start,
+	output logic active,
 	output logic done
 );
 
 	localparam COUNTER_BITS = $clog2(N_CLKS);
-	logic active;
 	logic [COUNTER_BITS-1 : 0] counter;
 
 	always_ff @(posedge clk) begin

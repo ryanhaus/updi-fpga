@@ -1,8 +1,8 @@
 // testbench for delay module
 module tb_delay();
 
-	logic clk, rst, start, done;
-	delay #(.N_CLKS(100)) dut (clk, rst, start, done);
+	logic clk, rst, start, active, done;
+	delay #(.N_CLKS(100)) dut (clk, rst, start, active, done);
 
 	integer i;
 
