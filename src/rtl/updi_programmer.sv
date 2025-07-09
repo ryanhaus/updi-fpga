@@ -103,15 +103,14 @@ module updi_programmer #(
 	logic [7:0] program_block_data [DATA_BLOCK_MAX_SIZE];
 
 	// interface signals
-	logic instr_converter_en;
 	updi_instruction instruction;
 	logic instr_sib;
 	logic [1:0] instr_size_a, instr_size_b, instr_ptr, instr_size_c;
 	logic [3:0] instr_cs_addr;
 
 	logic [7:0] instr_data [MAX_INSTRUCTION_DATA_SIZE];
-	logic [DATA_ADDR_BITS:0] instr_data_len, latched_instr_data_len;
-	logic [MAX_INSTRUCTION_DATA_SIZE-1 : 0] instr_wait_ack_after, latched_instr_wait_ack_after;
+	logic [DATA_ADDR_BITS:0] instr_data_len;
+	logic [MAX_INSTRUCTION_DATA_SIZE-1 : 0] instr_wait_ack_after;
 
 	logic interface_tx_start, interface_tx_ready, interface_tx_done;
 	logic interface_rx_start, interface_rx_ready, interface_rx_done, interface_ack_error, interface_rx_timeout;
@@ -157,7 +156,6 @@ module updi_programmer #(
 	) interface_inst (
 		.clk(clk),
 		.rst(rst | error),
-		.instr_converter_en(instr_converter_en),
 		.instruction(instruction),
 		.size_a(instr_size_a),
 		.size_b(instr_size_b),
@@ -166,8 +164,8 @@ module updi_programmer #(
 		.sib(instr_sib),
 		.size_c(instr_size_c),
 		.data(instr_data),
-		.data_len(latched_instr_data_len),
-		.wait_ack_after(latched_instr_wait_ack_after),
+		.data_len(instr_data_len),
+		.wait_ack_after(instr_wait_ack_after),
 		.tx_start(interface_tx_start),
 		.tx_ready(interface_tx_ready),
 		.tx_done(interface_tx_done),
@@ -496,7 +494,6 @@ module updi_programmer #(
 
 		double_break_start = 'b0;
 
-		instr_converter_en = 'b0;
 		instruction = UPDI_LDS;
 		instr_sib = 'b0;
 		instr_size_a = 'b0;
@@ -529,16 +526,15 @@ module updi_programmer #(
 			end
 
 			UPDI_PROG_READ_UPDI_STATUS_READ: begin
-				if (first_clock) begin
-					// send instruction to read STATUSA register (0x00)
-					instr_converter_en = 'b1;
-					instruction = UPDI_LDCS;
-					instr_cs_addr = 'h0;
+				// send instruction to read STATUSA register (0x00)
+				instruction = UPDI_LDCS;
+				instr_cs_addr = 'h0;
 
+				// init data read of 1 byte
+				interface_rx_n_bytes = 'd1;
+
+				if (first_clock) begin
 					interface_tx_start = 'b1;
-					
-					// init data read of 1 byte
-					interface_rx_n_bytes = 'd1;
 					interface_rx_start = 'b1;
 				end
 				else if (!out_rx_fifo_empty) begin
@@ -557,28 +553,26 @@ module updi_programmer #(
 			end
 
 			UPDI_PROG_UNLOCK_CHIPERASE_SEND_KEY: begin
+				instruction = UPDI_KEY;
+
+				load_key(`KEY_CHIPERASE, instr_data[0:7]); // NOTE: maybe move into if statement?
+				instr_data_len = 'd8;
+
 				if (first_clock) begin
-					instr_converter_en = 'b1;
-					instruction = UPDI_KEY;
-
-					load_key(`KEY_CHIPERASE, instr_data[0:7]);
-					instr_data_len = 'd8;
-
 					interface_tx_start = 'b1;
 				end
 			end
 
 			UPDI_PROG_UNLOCK_CHIPERASE_READ_STATUS: begin
+				// send instruction to read ASI_KEY_STATUS register (0x07)
+				instruction = UPDI_LDCS;
+				instr_cs_addr = 'h7;
+
+				// init data read of 1 byte
+				interface_rx_n_bytes = 'd1;
+
 				if (first_clock) begin
-					// send instruction to read ASI_KEY_STATUS register (0x07)
-					instr_converter_en = 'b1;
-					instruction = UPDI_LDCS;
-					instr_cs_addr = 'h7;
-
 					interface_tx_start = 'b1;
-
-					// init data read of 1 byte
-					interface_rx_n_bytes = 'd1;
 					interface_rx_start = 'b1;
 				end
 				else if (!out_rx_fifo_empty) begin
@@ -597,15 +591,14 @@ module updi_programmer #(
 			end
 
 			UPDI_PROG_UNLOCK_CHIPERASE_RESET_DEVICE_START: begin
+				// store the system reset signature (0x59) into ASI_RESET_REQ (0x08)
+				instruction = UPDI_STCS;
+				instr_cs_addr = 'h8;
+
+				instr_data[0] = 'h59;
+				instr_data_len = 'd1;
+
 				if (first_clock) begin
-					// store the system reset signature (0x59) into ASI_RESET_REQ (0x08)
-					instr_converter_en = 'b1;
-					instruction = UPDI_STCS;
-					instr_cs_addr = 'h8;
-
-					instr_data[0] = 'h59;
-					instr_data_len = 'd1;
-
 					interface_tx_start = 'b1;
 
 					// also, start the delay
@@ -614,30 +607,28 @@ module updi_programmer #(
 			end
 
 			UPDI_PROG_UNLOCK_CHIPERASE_RESET_DEVICE_CLEAR: begin
+				// clear ASI_RESET_REQ (0x08)
+				instruction = UPDI_STCS;
+				instr_cs_addr = 'h8;
+
+				instr_data[0] = 'h00;
+				instr_data_len = 'd1;
+
 				if (first_clock) begin
-					// clear ASI_RESET_REQ (0x08)
-					instr_converter_en = 'b1;
-					instruction = UPDI_STCS;
-					instr_cs_addr = 'h8;
-
-					instr_data[0] = 'h00;
-					instr_data_len = 'd1;
-
 					interface_tx_start = 'b1;
 				end
 			end
 
 			UPDI_PROG_UNLOCK_CHIPERASE_WAIT_FINISH_READ: begin
+				// read ASI_SYS_STATUS (0x0B)
+				instruction = UPDI_LDCS;
+				instr_cs_addr = 'hB;
+
+				// init data read of 1 byte
+				interface_rx_n_bytes = 'd1;
+
 				if (first_clock) begin
-					// read ASI_SYS_STATUS (0x0B)
-					instr_converter_en = 'b1;
-					instruction = UPDI_LDCS;
-					instr_cs_addr = 'hB;
-
 					interface_tx_start = 'b1;
-
-					// init data read of 1 byte
-					interface_rx_n_bytes = 'd1;
 					interface_rx_start = 'b1;
 				end
 				else if (!out_rx_fifo_empty) begin
@@ -659,28 +650,26 @@ module updi_programmer #(
 			end
 
 			UPDI_PROG_UNLOCK_NVMPROG_SEND_KEY: begin
+				instruction = UPDI_KEY;
+
+				load_key(`KEY_NVMPROG, instr_data[0:7]); // NOTE maybe move into if?
+				instr_data_len = 'd8;
+
 				if (first_clock) begin
-					instr_converter_en = 'b1;
-					instruction = UPDI_KEY;
-
-					load_key(`KEY_NVMPROG, instr_data[0:7]);
-					instr_data_len = 'd8;
-
 					interface_tx_start = 'b1;
 				end
 			end
 
 			UPDI_PROG_UNLOCK_NVMPROG_READ_STATUS: begin
+				// send instruction to read ASI_KEY_STATUS register (0x07)
+				instruction = UPDI_LDCS;
+				instr_cs_addr = 'h7;
+
+				// init data read of 1 byte
+				interface_rx_n_bytes = 'd1;
+
 				if (first_clock) begin
-					// send instruction to read ASI_KEY_STATUS register (0x07)
-					instr_converter_en = 'b1;
-					instruction = UPDI_LDCS;
-					instr_cs_addr = 'h7;
-
 					interface_tx_start = 'b1;
-
-					// init data read of 1 byte
-					interface_rx_n_bytes = 'd1;
 					interface_rx_start = 'b1;
 				end
 				else if (!out_rx_fifo_empty) begin
@@ -699,15 +688,14 @@ module updi_programmer #(
 			end
 
 			UPDI_PROG_UNLOCK_NVMPROG_RESET_DEVICE_START: begin
+				// store the system reset signature (0x59) into ASI_RESET_REQ (0x08)
+				instruction = UPDI_STCS;
+				instr_cs_addr = 'h8;
+
+				instr_data[0] = 'h59;
+				instr_data_len = 'd1;
+
 				if (first_clock) begin
-					// store the system reset signature (0x59) into ASI_RESET_REQ (0x08)
-					instr_converter_en = 'b1;
-					instruction = UPDI_STCS;
-					instr_cs_addr = 'h8;
-
-					instr_data[0] = 'h59;
-					instr_data_len = 'd1;
-
 					interface_tx_start = 'b1;
 
 					// also, start the delay
@@ -716,30 +704,28 @@ module updi_programmer #(
 			end
 
 			UPDI_PROG_UNLOCK_NVMPROG_RESET_DEVICE_CLEAR: begin
+				// clear ASI_RESET_REQ (0x08)
+				instruction = UPDI_STCS;
+				instr_cs_addr = 'h8;
+
+				instr_data[0] = 'h00;
+				instr_data_len = 'd1;
+
 				if (first_clock) begin
-					// clear ASI_RESET_REQ (0x08)
-					instr_converter_en = 'b1;
-					instruction = UPDI_STCS;
-					instr_cs_addr = 'h8;
-
-					instr_data[0] = 'h00;
-					instr_data_len = 'd1;
-
 					interface_tx_start = 'b1;
 				end
 			end
 
 			UPDI_PROG_UNLOCK_NVMPROG_WAIT_FINISH_READ: begin
-				if (first_clock) begin
-					// read ASI_SYS_STATUS (0x0B)
-					instr_converter_en = 'b1;
-					instruction = UPDI_LDCS;
-					instr_cs_addr = 'hB;
+				// read ASI_SYS_STATUS (0x0B)
+				instruction = UPDI_LDCS;
+				instr_cs_addr = 'hB;
+				
+				// init data read of 1 byte
+				interface_rx_n_bytes = 'd1;
 
+				if (first_clock) begin
 					interface_tx_start = 'b1;
-					
-					// init data read of 1 byte
-					interface_rx_n_bytes = 'd1;
 					interface_rx_start = 'b1;
 				end
 				else if (!out_rx_fifo_empty) begin
@@ -761,48 +747,46 @@ module updi_programmer #(
 			end
 			
 			UPDI_PROG_READ_DEVICE_ID_SET_RD_PTR: begin
+				// set the read pointer to 0x1100 (signatures base address)
+				instruction = UPDI_ST;
+				instr_ptr = 'b10;
+				instr_size_a = 'b01;
+
+				instr_data[0] = 'h00;
+				instr_data[1] = 'h11;
+				instr_data_len = 'd2;
+
+				instr_wait_ack_after[1] = 'b1;
+
 				if (first_clock) begin
-					// set the read pointer to 0x1100 (signatures base address)
-					instr_converter_en = 'b1;
-					instruction = UPDI_ST;
-					instr_ptr = 'b10;
-					instr_size_a = 'b01;
-
-					instr_data[0] = 'h00;
-					instr_data[1] = 'h11;
-					instr_data_len = 'd2;
-
-					instr_wait_ack_after[1] = 'b1;
-
 					interface_tx_start = 'b1;
 				end
 			end
 
 			UPDI_PROG_READ_DEVICE_ID_SET_REPEAT: begin
+				// want to repeat 2 times to read 3 bytes
+				instruction = UPDI_REPEAT;
+
+				instr_data[0] = 'd2;
+				instr_data_len = 'd1;
+
 				if (first_clock) begin
-					// want to repeat 2 times to read 3 bytes
-					instr_converter_en = 'b1;
-					instruction = UPDI_REPEAT;
-
-					instr_data[0] = 'd2;
-					instr_data_len = 'd1;
-
 					interface_tx_start = 'b1;
 				end
 			end
 
 			UPDI_PROG_READ_DEVICE_ID_READ: begin
+				// send LD command to load from (*ptr++)
+				instruction = UPDI_LD;
+				instr_ptr = 'b01;
+				instr_size_a = 'b00;
+				
+				// init data read of 3 bytes
+				interface_rx_n_bytes = 'd3;
+
 				if (first_clock) begin
-					// send LD command to load from (*ptr++)
-					instr_converter_en = 'b1;
-					instruction = UPDI_LD;
-					instr_ptr = 'b01;
-					instr_size_a = 'b00;
 
 					interface_tx_start = 'b1;
-					
-					// init data read of 3 byte
-					interface_rx_n_bytes = 'd3;
 					interface_rx_start = 'b1;
 				end
 				else if (interface_rx_ready) begin
@@ -842,21 +826,20 @@ module updi_programmer #(
 			end
 
 			UPDI_PROG_PROGRAM_ROM_NVM_CLEAR_WAIT_READY_READ: begin
+				// LDS from 0x1002 (NVM STATUS register)
+				instruction = UPDI_LDS;
+				instr_size_a = 'b01; // word address
+				instr_size_b = 'b00; // byte data
+
+				instr_data[0] = 'h02;
+				instr_data[1] = 'h10;
+				instr_data_len = 'd2;
+
+				// init data read of 1 byte
+				interface_rx_n_bytes = 'd1;
+
 				if (first_clock) begin
-					// LDS from 0x1002 (NVM STATUS register)
-					instr_converter_en = 'b1;
-					instruction = UPDI_LDS;
-					instr_size_a = 'b01; // word address
-					instr_size_b = 'b00; // byte data
-
-					instr_data[0] = 'h02;
-					instr_data[1] = 'h10;
-					instr_data_len = 'd2;
-
 					interface_tx_start = 'b1;
-
-					// init data read of 1 byte
-					interface_rx_n_bytes = 'd1;
 					interface_rx_start = 'b1;
 				end
 				else if (!out_rx_fifo_empty) begin
@@ -873,40 +856,38 @@ module updi_programmer #(
 			end
 
 			UPDI_PROG_PROGRAM_ROM_NVM_CLEAR: begin
+				// clear write buffer by writing PBC opcode (0x04) to the NVM
+				// CTRLA register (addr 0x1000)
+				instruction = UPDI_STS;
+				instr_size_a = 'b01; // word address
+				instr_size_b = 'b00; // byte data
+
+				instr_data[0] = 'h00;
+				instr_data[1] = 'h10;
+				instr_data[2] = 'h04;
+				instr_data_len = 'd3;
+				instr_wait_ack_after[1] = 'b1;
+
 				if (first_clock) begin
-					// clear write buffer by writing PBC opcode (0x04) to the NVM
-					// CTRLA register (addr 0x1000)
-					instr_converter_en = 'b1;
-					instruction = UPDI_STS;
-					instr_size_a = 'b01; // word address
-					instr_size_b = 'b00; // byte data
-
-					instr_data[0] = 'h00;
-					instr_data[1] = 'h10;
-					instr_data[2] = 'h04;
-					instr_data_len = 'd3;
-					instr_wait_ack_after[1] = 'b1;
-
 					interface_tx_start = 'b1;
 				end
 			end
 			
 			UPDI_PROG_PROGRAM_ROM_NVM_WAIT_READY_READ: begin
+				// LDS from 0x1002 (NVM STATUS register)
+				instruction = UPDI_LDS;
+				instr_size_a = 'b01; // word address
+				instr_size_b = 'b00; // byte data
+
+				instr_data[0] = 'h02;
+				instr_data[1] = 'h10;
+				instr_data_len = 'd2;
+
+				// init data read of 1 byte
+				interface_rx_n_bytes = 'd1;
+
 				if (first_clock) begin
-					// LDS from 0x1002 (NVM STATUS register)
-					instr_converter_en = 'b1;
-					instruction = UPDI_LDS;
-					instr_size_a = 'b01; // word address
-					instr_size_b = 'b00; // byte data
-
-					instr_data[0] = 'h02;
-					instr_data[1] = 'h10;
-					instr_data_len = 'd2;
-
 					interface_tx_start = 'b1;
-
-					// init data read of 1 byte
-					interface_rx_n_bytes = 'd1;
 					interface_rx_start = 'b1;
 				end
 				if (!out_rx_fifo_empty) begin
@@ -923,85 +904,80 @@ module updi_programmer #(
 			end
 
 			UPDI_PROG_PROGRAM_ROM_SET_WR_PTR: begin
+				// set the write pointer by using ST
+				instruction = UPDI_ST;
+				instr_ptr = 'b10; // writing to the pointer value
+				instr_size_a = 'b01; // word address
+
+				instr_data[0] = program_block_address[7:0];
+				instr_data[1] = program_block_address[15:8];
+				instr_data_len = 'd2;
+
 				if (first_clock) begin
-					// set the write pointer by using ST
-					instr_converter_en = 'b1;
-					instruction = UPDI_ST;
-					instr_ptr = 'b10; // writing to the pointer value
-					instr_size_a = 'b01; // word address
-
-					instr_data[0] = program_block_address[7:0];
-					instr_data[1] = program_block_address[15:8];
-					instr_data_len = 'd2;
-
 					interface_tx_start = 'b1;
 				end
 			end
 
 			UPDI_PROG_PROGRAM_ROM_SET_REPEAT: begin
+				// use REPEAT to write multiple bytes
+				instruction = UPDI_REPEAT;
+
+				// n/2 - 1 repeats = n/2 words written = n bytes written (rounded up)
+				instr_data[0] = (program_block_length >> 1) - 'b1;
+				instr_data_len = 'd1;
+
 				if (first_clock) begin
-					// use REPEAT to write multiple bytes
-					instr_converter_en = 'b1;
-					instruction = UPDI_REPEAT;
-
-					// n/2 - 1 repeats = n/2 words written = n bytes written (rounded up)
-					instr_data[0] = (program_block_length >> 1) - 'b1;
-					instr_data_len = 'd1;
-
 					interface_tx_start = 'b1;
 				end
 			end
 
 			UPDI_PROG_PROGRAM_ROM_WRITE_DATA: begin
+				// use ST to write all bytes
+				instruction = UPDI_ST;
+				instr_ptr = 'b01; // *(ptr++)
+				instr_size_a = 'b01; // write as words
+
+				instr_data = program_block_data;
+				instr_data_len = program_block_length[DATA_ADDR_BITS:0];
+
+				// since the values written are words, wait for ACK after
+				// every second byte, starting at byte 2 (index 1)
+				for (integer i = 1; i < program_block_length; i = i + 2) begin
+					instr_wait_ack_after[i] = 'b1;
+				end
+
 				if (first_clock) begin
-					// use ST to write all bytes
-					instr_converter_en = 'b1;
-					instruction = UPDI_ST;
-					instr_ptr = 'b01; // *(ptr++)
-					instr_size_a = 'b01; // write as words
-
-					instr_data = program_block_data;
-					instr_data_len = program_block_length[DATA_ADDR_BITS:0];
-
-					// since the values written are words, wait for ACK after
-					// every second byte, starting at byte 2 (index 1)
-					for (integer i = 1; i < program_block_length; i = i + 2) begin
-						instr_wait_ack_after[i] = 'b1;
-					end
-
 					interface_tx_start = 'b1;
 				end
 			end
 
 			UPDI_PROG_PROGRAM_ROM_WRITE_PAGE_BUFFER: begin
+				// write the page buffer to flash by writing the WP opcode
+				// (0x1) to the NVM CTRLA register (0x1000)
+				instruction = UPDI_STS;
+				instr_size_a = 'b01; // word address
+				instr_size_b = 'b00; // byte data
+
+				instr_data[0] = 'h00;
+				instr_data[1] = 'h10;
+				instr_data[2] = 'h01;
+				instr_data_len = 'd3;
+				instr_wait_ack_after[1] = 'b1;
+
 				if (first_clock) begin
-					// write the page buffer to flash by writing the WP opcode
-					// (0x1) to the NVM CTRLA register (0x1000)
-					instr_converter_en = 'b1;
-					instruction = UPDI_STS;
-					instr_size_a = 'b01; // word address
-					instr_size_b = 'b00; // byte data
-
-					instr_data[0] = 'h00;
-					instr_data[1] = 'h10;
-					instr_data[2] = 'h01;
-					instr_data_len = 'd3;
-					instr_wait_ack_after[1] = 'b1;
-
 					interface_tx_start = 'b1;
 				end
 			end
 
 			UPDI_PROG_PROGRAM_ROM_RESET_DEVICE_START: begin
+				// store the system reset signature (0x59) into ASI_RESET_REQ (0x08)
+				instruction = UPDI_STCS;
+				instr_cs_addr = 'h8;
+
+				instr_data[0] = 'h59;
+				instr_data_len = 'd1;
+
 				if (first_clock) begin
-					// store the system reset signature (0x59) into ASI_RESET_REQ (0x08)
-					instr_converter_en = 'b1;
-					instruction = UPDI_STCS;
-					instr_cs_addr = 'h8;
-
-					instr_data[0] = 'h59;
-					instr_data_len = 'd1;
-
 					interface_tx_start = 'b1;
 
 					// also, start the delay
@@ -1010,15 +986,14 @@ module updi_programmer #(
 			end
 
 			UPDI_PROG_PROGRAM_ROM_RESET_DEVICE_CLEAR: begin
+				// clear ASI_RESET_REQ (0x08)
+				instruction = UPDI_STCS;
+				instr_cs_addr = 'h8;
+
+				instr_data[0] = 'h00;
+				instr_data_len = 'd1;
+
 				if (first_clock) begin
-					// clear ASI_RESET_REQ (0x08)
-					instr_converter_en = 'b1;
-					instruction = UPDI_STCS;
-					instr_cs_addr = 'h8;
-
-					instr_data[0] = 'h00;
-					instr_data_len = 'd1;
-
 					interface_tx_start = 'b1;
 				end
 			end
@@ -1027,16 +1002,6 @@ module updi_programmer #(
 				// TODO
 			end
 		endcase
-	end
-
-	always_latch begin
-		// to keep instr_data_len, and instr_wait_ack_after in // 1 extra bit
-		// for sending the whole buffer
-		// sync with opcode updates
-		if (instr_converter_en) begin
-			latched_instr_data_len = instr_data_len;
-			latched_instr_wait_ack_after = instr_wait_ack_after;
-		end
 	end
 
 endmodule

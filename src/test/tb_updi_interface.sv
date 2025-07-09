@@ -24,7 +24,6 @@ module tb_updi_interface();
 	) dut (
 		.clk(clk),
 		.rst(rst),
-		.instr_converter_en('b1),
 		.instruction(instruction),
 		.size_a(size_a),
 		.size_b(size_b),
