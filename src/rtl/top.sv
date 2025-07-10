@@ -19,6 +19,26 @@ module top (
 	input double_break_busy,
 	input double_break_done
 );
+//
+	// reset on error
+	logic programmer_error, error;
+
+	one_shot #(.HOLD_CLOCKS(1000)) error_rst_one_shot (
+		.clk(clk),
+		.rst(rst),
+		.in(programmer_error),
+		.out(error)
+	);
+
+	// restart after error
+	logic restart;
+
+	one_shot #(.HOLD_CLOCKS(10)) error_restart_one_shot (
+		.clk(clk),
+		.rst(rst),
+		.in(error),
+		.out(restart)
+	);
 
 	// `ROM_NAME and `ROM_SIZE are passed from compiler
 	// buffer size should be next highest pwr of 2
@@ -31,10 +51,11 @@ module top (
 		.ROM_ADDR_BITS($clog2(ROM_BUFFER_SIZE))
 	) programmer_inst (
 		.clk(clk),
-		.rst(rst),
-		.start(start),
+		.rst(rst | error),
+		.start(start | restart),
 		.busy(busy),
 		.phy_error(phy_error),
+		.error_out(programmer_error),
 		.uart_tx_fifo_data_in(uart_tx_fifo_data_in),
 		.uart_tx_fifo_wr_en(uart_tx_fifo_wr_en),
 		.uart_tx_fifo_full(uart_tx_fifo_full),
@@ -55,6 +76,7 @@ module top (
 	input rst_btn,
 	input programmer_start,
 	output programmer_busy,
+	output error,
 	inout updi
 );
 
@@ -64,6 +86,7 @@ module top (
 	localparam TIMEOUT_MS = 500;
 	localparam POST_READ_DELAY_US = 5000;
 	localparam POST_WRITE_DELAY_US = 5000;
+	localparam ERROR_RST_MS = 100;
 	localparam UART_CLK_FREQ = 57600;
 
 	localparam DOUBLE_BREAK_CLKS = CLK_FREQ / 1000 * DOUBLE_BREAK_MS;
@@ -71,6 +94,7 @@ module top (
 	localparam TIMEOUT_CLKS = CLK_FREQ / 1000 * TIMEOUT_MS;
 	localparam POST_READ_DELAY_CLKS = CLK_FREQ / 1000000 * POST_READ_DELAY_US;
 	localparam POST_WRITE_DELAY_CLKS = CLK_FREQ / 1000000 * POST_WRITE_DELAY_US;
+	localparam ERROR_RST_CLKS = CLK_FREQ / 1000 * ERROR_RST_MS;
 	localparam UART_CLK_DIV = CLK_FREQ / UART_CLK_FREQ;
 
 	// auto reset
@@ -82,6 +106,26 @@ module top (
 	end
 	
 	logic rst = ~rst_btn;
+
+	// reset on error
+	logic programmer_error;
+
+	one_shot #(.HOLD_CLOCKS(ERROR_RST_CLKS)) error_rst_one_shot (
+		.clk(clk),
+		.rst(rst | autorst),
+		.in(programmer_error),
+		.out(error)
+	);
+
+	// restart after error
+	logic restart;
+
+	one_shot #(.HOLD_CLOCKS(10)) error_restart_one_shot (
+		.clk(clk),
+		.rst(rst),
+		.in(error),
+		.out(restart)
+	);
 
 	// programmer instance
 	logic [7:0] uart_tx_fifo_data_in, uart_rx_fifo_data_out;
@@ -99,10 +143,11 @@ module top (
 		.AUTO_START(0)
 	) programmer_inst (
 		.clk(clk),
-		.rst(rst | autorst),
-		.start(programmer_start),
+		.rst(rst | autorst | error),
+		.start(programmer_start | restart),
 		.busy(programmer_busy),
 		.phy_error(phy_error),
+		.error_out(programmer_error),
 		.uart_tx_fifo_data_in(uart_tx_fifo_data_in),
 		.uart_tx_fifo_wr_en(uart_tx_fifo_wr_en),
 		.uart_tx_fifo_full(uart_tx_fifo_full),
@@ -120,7 +165,7 @@ module top (
 		.UART_CLK_DIV(UART_CLK_DIV)
 	) phy_inst (
 		.clk(clk),
-		.rst(rst | autorst),
+		.rst(rst | autorst | error),
 		.uart_tx_fifo_data(uart_tx_fifo_data_in),
 		.uart_tx_fifo_wr_en(uart_tx_fifo_wr_en),
 		.uart_tx_fifo_full(uart_tx_fifo_full),

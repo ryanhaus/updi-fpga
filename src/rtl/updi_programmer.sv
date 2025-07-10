@@ -82,6 +82,7 @@ module updi_programmer #(
 	input start,
 	output logic busy,
 	input phy_error,
+	output error_out,
 
 	// UART PHY instance
 	output [7:0] uart_tx_fifo_data_in,
@@ -129,8 +130,7 @@ module updi_programmer #(
 	logic delay_start, delay_done;
 
 	// error signal
-	logic error;
-	assign error = interface_ack_error | interface_rx_timeout | phy_error;
+	assign error_out = interface_ack_error | interface_rx_timeout | phy_error;
 
 	// program ROM instance
 	program_rom #(
@@ -140,7 +140,7 @@ module updi_programmer #(
 		.ROM_ADDR_BITS(ROM_ADDR_BITS)
 	) rom_inst (
 		.clk(clk),
-		.rst(rst | error),
+		.rst(rst),
 		.start(program_start),
 		.ready(program_ready),
 		.done(program_done),
@@ -159,7 +159,7 @@ module updi_programmer #(
 		.POST_WRITE_DELAY_CLKS(POST_WRITE_DELAY_CLKS)
 	) interface_inst (
 		.clk(clk),
-		.rst(rst | error),
+		.rst(rst),
 		.instruction(instruction),
 		.size_a(instr_size_a),
 		.size_b(instr_size_b),
@@ -195,7 +195,7 @@ module updi_programmer #(
 		.DEPTH(RX_OUT_FIFO_DEPTH)
 	) rx_out_fifo_inst (
 		.clk(clk),
-		.rst(rst | error),
+		.rst(rst),
 		.in(out_rx_fifo_data_in),
 		.out(out_rx_fifo_data_out),
 		.rd_en(out_rx_fifo_rd_en),
@@ -209,7 +209,7 @@ module updi_programmer #(
 	// delay instance
 	delay #(.N_CLKS(DELAY_N_CLKS)) delay_inst (
 		.clk(clk),
-		.rst(rst | error),
+		.rst(rst),
 		.start(delay_start),
 		.active(),
 		.done(delay_done)
@@ -227,9 +227,6 @@ module updi_programmer #(
 			state <= AUTO_START
 				? UPDI_PROG_RESET_UPDI_DB_START
 				: UPDI_PROG_IDLE;
-		end
-		else if (error) begin
-			state <= UPDI_PROG_RESET_UPDI_DB_START;
 		end
 		else begin
 			case (state)
@@ -489,7 +486,7 @@ module updi_programmer #(
 	end
 
 	always_comb begin
-		if (rst | error) begin
+		if (rst) begin
 			device_id = '{default: 'b0};
 		end
 
