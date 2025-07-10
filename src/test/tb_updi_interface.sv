@@ -107,7 +107,7 @@ module tb_updi_interface();
 	// testbench logic
 	integer i;
 
-	initial #10000 $error();
+	initial #100000 $error();
 	initial begin
 		$dumpfile("trace/tb_updi_interface.fst");
 		$dumpvars();

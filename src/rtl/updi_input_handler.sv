@@ -2,7 +2,6 @@
 typedef enum {
 	UPDI_IN_HDLR_IDLE,
 	UPDI_IN_HDLR_READ_ACK,
-	UPDI_IN_HDLR_CHECK_ACK,
 	UPDI_IN_HDLR_FIFO_READ,
 	UPDI_IN_HDLR_FIFO_WRITE,
 	UPDI_IN_HDLR_DELAY_START,
@@ -68,7 +67,7 @@ module updi_input_handler #(
 	);
 
 	// state machine
-	updi_input_handler_state state;
+	updi_input_handler_state state, delay_prev_state;
 	logic [BITS_N-1 : 0] counter;
 	assign out_fifo_data = in_fifo_data;
 
@@ -95,12 +94,9 @@ module updi_input_handler #(
 					end
 
 					if (!in_fifo_empty) begin
-						state <= UPDI_IN_HDLR_CHECK_ACK;
+						delay_prev_state <= UPDI_IN_HDLR_READ_ACK;
+						state <= UPDI_IN_HDLR_DELAY_START;
 					end
-				end
-
-				UPDI_IN_HDLR_CHECK_ACK: begin
-					state <= UPDI_IN_HDLR_IDLE;
 				end
 
 				UPDI_IN_HDLR_FIFO_READ: begin
@@ -116,6 +112,7 @@ module updi_input_handler #(
 				UPDI_IN_HDLR_FIFO_WRITE: begin
 					if (!out_fifo_full) begin
 						if (counter == 'b1) begin
+							delay_prev_state <= UPDI_IN_HDLR_FIFO_WRITE;
 							state <= UPDI_IN_HDLR_DELAY_START;
 						end
 						else begin
@@ -172,17 +169,6 @@ module updi_input_handler #(
 				end
 			end
 
-			UPDI_IN_HDLR_CHECK_ACK: begin
-				in_fifo_rd_en = 'b0;
-
-				if (in_fifo_data == 'h40) begin
-					ack_received = 'b1;
-				end
-				else begin
-					ack_error = 'b0;
-				end
-			end
-
 			UPDI_IN_HDLR_FIFO_READ: begin
 				timeout_start = 'b1;
 				timeout_rst = 'b0;
@@ -207,6 +193,15 @@ module updi_input_handler #(
 			end
 
 			UPDI_IN_HDLR_DONE: begin
+				if (delay_prev_state == UPDI_IN_HDLR_READ_ACK) begin
+					if (in_fifo_data == 'h40) begin
+						ack_received = 'b1;
+					end
+					else begin
+						ack_error = 'b0;
+					end
+				end
+
 				ready = 'b1;
 				done = 'b1;
 			end
