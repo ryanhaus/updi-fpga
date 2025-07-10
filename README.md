@@ -27,13 +27,14 @@ Run `make test` to build the binaries, or `make test_run` to build and run all b
 For building/running individual tests, use `make test_NAME` and `make test_run_NAME`, respectively.
 
 ## Hardware
-TBD
+This project was tested with a [Digilent Arty A7-100T](https://digilent.com/shop/arty-a7-100t-artix-7-fpga-development-board/) development board.<br/>
+The Vivado project file `updi-fpga.xpr` is included with all configurations needed for bitstream generation.<br/>
+Currently, it is configured so that the UPDI signal is on `IO1`, the start button is `BTN0`, and the 'busy' LED is `LD4`. This can be modified in `src/constraints/arty-a7-100t.xdc`.<br/>
+As of now, the design appears to be fully working in hardware :)
 
 ## Potential Future Improvements
-- Need to get working in hardware.
-- Make it easier to adapt for other microcontrollers which may have things mapped for different memory locations.
+- Make it easier to adapt for other microcontrollers, which may have things mapped for different memory locations.
+- Use Vivado's CLI tools to make it easier to build bitsreams.
 - A smarter watchdog system that could perhaps just retry the last thing instead of fully resetting upon an error.
-- Maybe have the ROM be a separate module, or even make it a writeable form of memory.
-- AXI bus interface?
 - Verify flashed program after programming is finished.
 - Virtual UPDI-capable MCU for simulation (maybe overkill).
