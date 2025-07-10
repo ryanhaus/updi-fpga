@@ -34,7 +34,7 @@ As of now, the design appears to be fully working in hardware :)
 
 ## Potential Future Improvements
 - Make it easier to adapt for other microcontrollers, which may have things mapped for different memory locations.
-- Use Vivado's CLI tools to make it easier to build bitsreams.
+- Use Vivado's CLI tools to make it easier to build bitstreams.
 - A smarter watchdog system that could perhaps just retry the last thing instead of fully resetting upon an error.
 - Verify flashed program after programming is finished.
 - Virtual UPDI-capable MCU for simulation (maybe overkill).
