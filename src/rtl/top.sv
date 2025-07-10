@@ -62,8 +62,8 @@ module top (
 	localparam DOUBLE_BREAK_MS = 50;
 	localparam DELAY_MS = 50;
 	localparam TIMEOUT_MS = 500;
-	localparam POST_READ_DELAY_US = 100;
-	localparam POST_WRITE_DELAY_US = 1000;
+	localparam POST_READ_DELAY_US = 5000;
+	localparam POST_WRITE_DELAY_US = 5000;
 	localparam UART_CLK_FREQ = 57600;
 
 	localparam DOUBLE_BREAK_CLKS = CLK_FREQ / 1000 * DOUBLE_BREAK_MS;
