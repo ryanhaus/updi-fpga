@@ -29,7 +29,7 @@ For building/running individual tests, use `make test_NAME` and `make test_run_N
 ## Hardware
 This project was tested with a [Digilent Arty A7-100T](https://digilent.com/shop/arty-a7-100t-artix-7-fpga-development-board/) development board.<br/>
 The Vivado project file `updi-fpga.xpr` is included with all configurations needed for bitstream generation.<br/>
-Currently, it is configured so that the UPDI signal is on `IO1`, the start button is `BTN0`, and the 'busy' LED is `LD4`. This can be modified in `src/constraints/arty-a7-100t.xdc`.<br/>
+Currently, it is configured so that the UPDI signal is on `IO1`, the start button is `BTN0`, the 'busy' LED is `LD4`, and the 'error' LED is `LD5`. This can be modified in `src/constraints/arty-a7-100t.xdc`.<br/>
 As of now, the design appears to be fully working in hardware :)
 
 ## Potential Future Improvements
